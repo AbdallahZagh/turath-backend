@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
-import { setupSwagger } from './swagger.js';
+import { setupSwagger } from './core/swagger.js';
 
 /**
  * HTTP-level setup shared by main.ts and the e2e tests, so tests exercise the

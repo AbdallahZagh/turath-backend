@@ -4,25 +4,24 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
-import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { I18nModule, I18nValidationPipe } from 'nestjs-i18n';
 import { AllExceptionsFilter, gatewayEnvSchema, i18nOptions } from '@turath/common';
-import { IDENTITY_CLIENT, IDENTITY_QUEUE } from '@turath/contracts';
 import { REDIS_CLIENT, RedisModule, RedisThrottlerStorage, type RedisClient } from '@turath/redis';
-import { AdminController } from './admin/admin.controller.js';
-import { ApiKeyGuard } from './admin/api-key.guard.js';
-import { AuthController } from './auth/auth.controller.js';
-import { AuthCookies } from './auth/auth.cookies.js';
-import { JwtAuthGuard, RolesGuard } from './auth/auth.guards.js';
-import { HealthController } from './health/health.controller.js';
-import { AppThrottlerGuard } from './infra/app-throttler.guard.js';
-import { IdentityClient } from './infra/identity.client.js';
-import { MetaController } from './meta/meta.controller.js';
-import { PreferencesController } from './preferences/preferences.controller.js';
+import { JwtAuthGuard, RolesGuard } from './core/auth/auth.guards.js';
+import { CoreModule } from './core/core.module.js';
+import { AppThrottlerGuard } from './core/guards/app-throttler.guard.js';
+import { AdminModule } from './modules/admin/admin.module.js';
+import { AuthModule } from './modules/auth/auth.module.js';
+import { HealthModule } from './modules/health/health.module.js';
+import { MetaModule } from './modules/meta/meta.module.js';
+import { PreferencesModule } from './modules/preferences/preferences.module.js';
+import { ProfileModule } from './modules/profile/profile.module.js';
+import { SessionsModule } from './modules/sessions/sessions.module.js';
 
 @Module({
   imports: [
+    // ── platform ──
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env'],
@@ -64,30 +63,27 @@ import { PreferencesController } from './preferences/preferences.controller.js';
       }),
     }),
 
-    ClientsModule.registerAsync([
-      {
-        name: IDENTITY_CLIENT,
-        inject: [ConfigService],
-        useFactory: (config: ConfigService) => ({
-          transport: Transport.RMQ,
-          options: {
-            urls: [config.getOrThrow<string>('RABBITMQ_URL')],
-            queue: IDENTITY_QUEUE,
-            queueOptions: { durable: true },
-          },
-        }),
-      },
-    ]),
+    CoreModule,
+
+    // ── API areas (Swagger lists them in this order) ──
+    AuthModule,
+    ProfileModule,
+    SessionsModule,
+    PreferencesModule,
+    MetaModule,
+    HealthModule,
+    AdminModule,
   ],
-  controllers: [AuthController, PreferencesController, MetaController, HealthController, AdminController],
   providers: [
-    AuthCookies,
-    IdentityClient,
-    ApiKeyGuard,
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
     {
       provide: APP_PIPE,
-      useValue: new I18nValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true, stopAtFirstError: true }),
+      useValue: new I18nValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+        stopAtFirstError: true,
+      }),
     },
     // Order matters: authenticate first so the throttler can key by user id.
     { provide: APP_GUARD, useClass: JwtAuthGuard },
