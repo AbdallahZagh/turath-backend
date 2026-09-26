@@ -1,12 +1,13 @@
 import { Body, Controller, Get, Put, Req, Res } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { I18nContext } from 'nestjs-i18n';
 import { DEFAULT_LOCALE, DEFAULT_THEME, isLocale, type Locale, type Theme } from '@turath/common';
 import { IdentityPatterns } from '@turath/contracts';
 import { AuthCookies } from '../auth/auth.cookies.js';
 import { type AuthUser, CurrentUser, Public } from '../auth/auth.decorators.js';
-import { PreferencesDto, UpdatePreferencesDto } from '../auth/auth.dto.js';
+import { ErrorResponseDto, PreferencesDto, UpdatePreferencesDto } from '../auth/auth.dto.js';
+import { PREFERENCES_GET_DESCRIPTION, PREFERENCES_UPDATE_DESCRIPTION } from '../docs.js';
 import { IdentityClient } from '../infra/identity.client.js';
 
 const dirFor = (locale: Locale): 'ltr' | 'rtl' => (locale === 'ar' ? 'rtl' : 'ltr');
@@ -27,7 +28,7 @@ export class PreferencesController {
   ) {}
 
   @Get()
-  @ApiOperation({ summary: 'Current language, text direction and theme' })
+  @ApiOperation({ summary: 'Current language, text direction and theme', description: PREFERENCES_GET_DESCRIPTION })
   @ApiOkResponse({ type: PreferencesDto })
   get(@Req() req: Request): PreferencesDto {
     const stored = this.cookies.readPreferences(req);
@@ -37,8 +38,12 @@ export class PreferencesController {
   }
 
   @Put()
-  @ApiOperation({ summary: 'Change language and/or theme (sets the cookies)' })
-  @ApiOkResponse({ type: PreferencesDto })
+  @ApiOperation({
+    summary: 'Change the language and/or theme (saved on the account when signed in)',
+    description: PREFERENCES_UPDATE_DESCRIPTION,
+  })
+  @ApiOkResponse({ type: PreferencesDto, description: 'Preferences after the change; cookies are set.' })
+  @ApiBadRequestResponse({ type: ErrorResponseDto, description: '`VALIDATION_FAILED` (one translated message per field)' })
   async update(
     @Body() dto: UpdatePreferencesDto,
     @Req() req: Request,

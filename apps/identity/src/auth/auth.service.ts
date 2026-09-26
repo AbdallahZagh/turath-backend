@@ -161,7 +161,7 @@ export class AuthService {
     return { ...response, expiresInSeconds: this.resetTtlSeconds, ...(this.devEcho && { devCode: token }) };
   }
 
-  /** Single-use token; every session is signed out after a reset. */
+  /** Single-use token. Existing sessions stay signed in. */
   async resetPassword(input: PasswordResetPayload): Promise<void> {
     const userId = await this.redis.getDel(resetKey(input.token));
     if (!userId) throw rpcError(ErrorCode.RESET_TOKEN_INVALID);
@@ -170,7 +170,6 @@ export class AuthService {
       where: { id: userId },
       data: { passwordHash: await argon2.hash(input.password, { type: argon2.argon2id }) },
     });
-    await this.sessions.revokeAll(userId);
     await this.users.evict(userId);
   }
 

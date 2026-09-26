@@ -6,7 +6,6 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseUUIDPipe,
   Post,
   Req,
   Res,
@@ -17,8 +16,11 @@ import {
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiForbiddenResponse,
+  ApiNoContentResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiTags,
   ApiTooManyRequestsResponse,
   ApiUnauthorizedResponse,
@@ -35,9 +37,24 @@ import {
   type SessionView,
   type UserView,
 } from '@turath/contracts';
+import {
+  LOGIN_EMAIL_DESCRIPTION,
+  LOGIN_PHONE_DESCRIPTION,
+  LOGIN_PHONE_VERIFY_DESCRIPTION,
+  LOGOUT_DESCRIPTION,
+  LOGOUT_OTHERS_DESCRIPTION,
+  OTP_SEND_DESCRIPTION,
+  OTP_VERIFY_DESCRIPTION,
+  PASSWORD_FORGOT_DESCRIPTION,
+  PASSWORD_RESET_DESCRIPTION,
+  PROFILE_DESCRIPTION,
+  REGISTER_DESCRIPTION,
+  SESSION_REVOKE_DESCRIPTION,
+  SESSIONS_DESCRIPTION,
+} from '../docs.js';
 import { IdentityClient } from '../infra/identity.client.js';
+import { ParseIdPipe } from '../infra/parse-id.pipe.js';
 import { AuthCookies } from './auth.cookies.js';
-import { LOGIN_EMAIL_DESCRIPTION, LOGIN_PHONE_DESCRIPTION, LOGIN_PHONE_VERIFY_DESCRIPTION, REGISTER_DESCRIPTION } from './auth.docs.js';
 import { type AuthUser, CurrentUser, Public } from './auth.decorators.js';
 import {
   AuthResponseDto,
@@ -49,6 +66,7 @@ import {
   OtpDispatchDto,
   RegisterDto,
   ResetPasswordDto,
+  RevokedCountDto,
   SendOtpDto,
   SessionDto,
   UserDto,
@@ -59,9 +77,12 @@ import {
 const OTP_LIMIT = { default: { limit: 5, ttl: 60_000 } };
 const LOGIN_LIMIT = { default: { limit: 10, ttl: 60_000 } };
 
+/** Only on routes that validate a body or route param. */
+const ValidationErrorResponse = () =>
+  ApiBadRequestResponse({ type: ErrorResponseDto, description: '`VALIDATION_FAILED` (one translated message per field)' });
+
 @ApiTags('auth')
-@ApiBadRequestResponse({ type: ErrorResponseDto, description: 'Validation failed (messages are translated)' })
-@ApiTooManyRequestsResponse({ type: ErrorResponseDto })
+@ApiTooManyRequestsResponse({ type: ErrorResponseDto, description: 'Rate limited; the message says how long to wait' })
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -76,6 +97,7 @@ export class AuthController {
     summary: 'Create a tourist or provider account and send a verification code to the phone',
     description: REGISTER_DESCRIPTION,
   })
+  @ValidationErrorResponse()
   @ApiCreatedResponse({ type: OtpDispatchDto, description: 'Account created (unverified); a 6-digit code was sent by SMS.' })
   @ApiConflictResponse({ type: ErrorResponseDto, description: '`PHONE_TAKEN` or `EMAIL_TAKEN` (a verified account already uses it)' })
   register(@Body() dto: RegisterDto): Promise<OtpDispatch> {
@@ -102,6 +124,7 @@ export class AuthController {
     summary: 'Sign in with email and password (no code). Returns the access and refresh tokens.',
     description: LOGIN_EMAIL_DESCRIPTION,
   })
+  @ValidationErrorResponse()
   @ApiOkResponse({ type: AuthResponseDto, description: 'Signed in. Session cookies are set as well.' })
   @ApiUnauthorizedResponse({ type: ErrorResponseDto, description: '`INVALID_CREDENTIALS`' })
   @ApiForbiddenResponse({ type: ErrorResponseDto, description: '`ACCOUNT_NOT_VERIFIED` or `ACCOUNT_LOCKED`' })
@@ -126,6 +149,7 @@ export class AuthController {
     summary: 'Phone login, step 1: send a 6-digit code by SMS (returned as devCode for now)',
     description: LOGIN_PHONE_DESCRIPTION,
   })
+  @ValidationErrorResponse()
   @ApiOkResponse({ type: OtpDispatchDto, description: 'Code sent (or silently skipped if the number is not registered).' })
   loginPhone(@Body() dto: LoginPhoneDto): Promise<OtpDispatch> {
     return this.identity.send(IdentityPatterns.OTP_SEND, { channel: 'phone', destination: dto.phone });
@@ -139,6 +163,7 @@ export class AuthController {
     summary: 'Phone login, step 2: exchange the code for the access and refresh tokens',
     description: LOGIN_PHONE_VERIFY_DESCRIPTION,
   })
+  @ValidationErrorResponse()
   @ApiOkResponse({ type: AuthResponseDto, description: 'Signed in. Session cookies are set as well.' })
   @ApiForbiddenResponse({ type: ErrorResponseDto, description: '`ACCOUNT_LOCKED`' })
   async loginPhoneVerify(
@@ -159,8 +184,9 @@ export class AuthController {
   @Throttle(OTP_LIMIT)
   @HttpCode(HttpStatus.OK)
   @Post('otp/send')
-  @ApiOperation({ summary: 'Phone login, or resend a code. Answers the same whether or not the account exists.' })
-  @ApiOkResponse({ type: OtpDispatchDto })
+  @ApiOperation({ summary: 'Resend a verification code to a phone or email', description: OTP_SEND_DESCRIPTION })
+  @ValidationErrorResponse()
+  @ApiOkResponse({ type: OtpDispatchDto, description: 'Code sent (or silently skipped if no account uses it).' })
   sendOtp(@Body() dto: SendOtpDto): Promise<OtpDispatch> {
     return this.identity.send(IdentityPatterns.OTP_SEND, { channel: dto.channel, destination: dto.destination });
   }
@@ -170,9 +196,12 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('otp/verify')
   @ApiOperation({
-    summary: 'Exchange a code for a session (finishes signup). Returns the tokens and sets the session cookies.',
+    summary: 'Confirm a code and sign in (finishes signup). Returns the access and refresh tokens.',
+    description: OTP_VERIFY_DESCRIPTION,
   })
-  @ApiOkResponse({ type: AuthResponseDto })
+  @ValidationErrorResponse()
+  @ApiOkResponse({ type: AuthResponseDto, description: 'Verified and signed in. Session cookies are set as well.' })
+  @ApiForbiddenResponse({ type: ErrorResponseDto, description: '`ACCOUNT_LOCKED`' })
   async verifyOtp(
     @Body() dto: VerifyOtpDto,
     @Req() req: Request,
@@ -191,8 +220,12 @@ export class AuthController {
   @Throttle(OTP_LIMIT)
   @HttpCode(HttpStatus.OK)
   @Post('password/forgot')
-  @ApiOperation({ summary: 'Send a reset link (valid 10 minutes). Answers the same whether or not the account exists.' })
-  @ApiOkResponse({ type: OtpDispatchDto })
+  @ApiOperation({
+    summary: 'Password reset, step 1: send a reset code to the phone or email',
+    description: PASSWORD_FORGOT_DESCRIPTION,
+  })
+  @ValidationErrorResponse()
+  @ApiOkResponse({ type: OtpDispatchDto, description: 'Reset code sent (or silently skipped if no account uses it).' })
   forgotPassword(@Body() dto: ForgotPasswordDto): Promise<OtpDispatch> {
     return this.identity.send(IdentityPatterns.PASSWORD_FORGOT, { channel: dto.channel, destination: dto.destination });
   }
@@ -201,24 +234,31 @@ export class AuthController {
   @Throttle(LOGIN_LIMIT)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('password/reset')
-  @ApiOperation({ summary: 'Set a new password with the reset token. Signs out every session.' })
+  @ApiOperation({
+    summary: 'Password reset, step 2: set a new password with the reset code',
+    description: PASSWORD_RESET_DESCRIPTION,
+  })
+  @ValidationErrorResponse()
+  @ApiNoContentResponse({ description: 'Password changed.' })
   async resetPassword(@Body() dto: ResetPasswordDto): Promise<void> {
     await this.identity.send(IdentityPatterns.PASSWORD_RESET, { token: dto.token, password: dto.password });
   }
 
-  @Get('me')
+  @Get('profile')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'The signed-in user' })
+  @ApiOperation({ summary: 'Profile of the signed-in user', description: PROFILE_DESCRIPTION })
   @ApiOkResponse({ type: UserDto })
-  @ApiUnauthorizedResponse({ type: ErrorResponseDto })
-  me(@CurrentUser() user: AuthUser): Promise<UserView> {
+  @ApiUnauthorizedResponse({ type: ErrorResponseDto, description: '`UNAUTHORIZED` or `SESSION_EXPIRED`' })
+  profile(@CurrentUser() user: AuthUser): Promise<UserView> {
     return this.identity.send(IdentityPatterns.ME, { userId: user.id });
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('logout')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Sign out this device' })
+  @ApiOperation({ summary: 'Sign out this device', description: LOGOUT_DESCRIPTION })
+  @ApiNoContentResponse({ description: 'Signed out; session cookies cleared.' })
+  @ApiUnauthorizedResponse({ type: ErrorResponseDto, description: '`UNAUTHORIZED` or `SESSION_EXPIRED`' })
   async logout(@CurrentUser() user: AuthUser, @Res({ passthrough: true }) res: Response): Promise<void> {
     await this.identity.send(IdentityPatterns.LOGOUT, { userId: user.id, sessionId: user.sessionId });
     this.cookies.clearSession(res);
@@ -227,15 +267,18 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('logout/others')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Sign out every other device' })
-  logoutOthers(@CurrentUser() user: AuthUser): Promise<{ revoked: number }> {
+  @ApiOperation({ summary: 'Sign out every other device', description: LOGOUT_OTHERS_DESCRIPTION })
+  @ApiOkResponse({ type: RevokedCountDto })
+  @ApiUnauthorizedResponse({ type: ErrorResponseDto, description: '`UNAUTHORIZED` or `SESSION_EXPIRED`' })
+  logoutOthers(@CurrentUser() user: AuthUser): Promise<RevokedCountDto> {
     return this.identity.send(IdentityPatterns.LOGOUT_ALL, { userId: user.id, sessionId: user.sessionId });
   }
 
   @Get('sessions')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Devices signed in to this account' })
+  @ApiOperation({ summary: 'Devices signed in to this account', description: SESSIONS_DESCRIPTION })
   @ApiOkResponse({ type: [SessionDto] })
+  @ApiUnauthorizedResponse({ type: ErrorResponseDto, description: '`UNAUTHORIZED` or `SESSION_EXPIRED`' })
   sessions(@CurrentUser() user: AuthUser): Promise<SessionView[]> {
     return this.identity.send(IdentityPatterns.SESSIONS_LIST, { userId: user.id, sessionId: user.sessionId });
   }
@@ -243,11 +286,13 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('sessions/:id')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Sign out one device' })
-  async revokeSession(
-    @CurrentUser() user: AuthUser,
-    @Param('id', new ParseUUIDPipe()) sessionId: string,
-  ): Promise<void> {
+  @ApiOperation({ summary: 'Sign out one device', description: SESSION_REVOKE_DESCRIPTION })
+  @ValidationErrorResponse()
+  @ApiParam({ name: 'id', format: 'uuid', description: 'Session id from `GET /auth/sessions`.' })
+  @ApiNoContentResponse({ description: 'That device is signed out.' })
+  @ApiUnauthorizedResponse({ type: ErrorResponseDto, description: '`UNAUTHORIZED` or `SESSION_EXPIRED`' })
+  @ApiNotFoundResponse({ type: ErrorResponseDto, description: '`SESSION_NOT_FOUND`' })
+  async revokeSession(@CurrentUser() user: AuthUser, @Param('id', ParseIdPipe) sessionId: string): Promise<void> {
     await this.identity.send(IdentityPatterns.SESSIONS_REVOKE, { userId: user.id, sessionId });
   }
 

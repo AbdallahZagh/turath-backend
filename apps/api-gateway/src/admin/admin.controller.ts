@@ -6,7 +6,6 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseUUIDPipe,
   Patch,
   Post,
   UseGuards,
@@ -16,6 +15,7 @@ import { Throttle } from '@nestjs/throttler';
 import { ADMIN_PERMISSIONS, ADMIN_ROLES, AdminPatterns, type AdminView } from '@turath/contracts';
 import { Public } from '../auth/auth.decorators.js';
 import { IdentityClient } from '../infra/identity.client.js';
+import { ParseIdPipe } from '../infra/parse-id.pipe.js';
 import { CreateAdminDto, UpdateAdminDto } from './admin.dto.js';
 import { ApiKeyGuard } from './api-key.guard.js';
 
@@ -55,12 +55,12 @@ export class AdminController {
   }
 
   @Get('admins/:id')
-  get(@Param('id', new ParseUUIDPipe()) id: string): Promise<AdminView> {
+  get(@Param('id', ParseIdPipe) id: string): Promise<AdminView> {
     return this.identity.send(AdminPatterns.GET, { id });
   }
 
   @Patch('admins/:id')
-  update(@Param('id', new ParseUUIDPipe()) id: string, @Body() dto: UpdateAdminDto): Promise<AdminView> {
+  update(@Param('id', ParseIdPipe) id: string, @Body() dto: UpdateAdminDto): Promise<AdminView> {
     const { name, ...rest } = dto;
     return this.identity.send(AdminPatterns.UPDATE, {
       id,
@@ -71,7 +71,7 @@ export class AdminController {
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('admins/:id')
-  async delete(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
+  async delete(@Param('id', ParseIdPipe) id: string): Promise<void> {
     await this.identity.send(AdminPatterns.DELETE, { id });
   }
 }

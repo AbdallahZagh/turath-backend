@@ -267,84 +267,109 @@ export class LoginPhoneVerifyDto extends LoginPhoneDto {
 }
 
 export class SendOtpDto {
-  @ApiProperty({ enum: AUTH_CHANNELS, example: 'phone' })
-  @IsIn(AUTH_CHANNELS, { message: msg('validation.ONE_OF') })
+  @ApiProperty({ enum: AUTH_CHANNELS, example: 'phone', description: 'Where the code goes: `phone` (SMS) or `email`.' })
+  @IsIn(AUTH_CHANNELS, { message: msg('validation.CHANNEL') })
+  @IsNotEmpty({ message: msg('validation.REQUIRED') })
   channel: AuthChannel;
 
-  @ApiProperty({ example: '0944 123 456', description: 'Phone (Syrian numbers by default) or email' })
+  @ApiProperty({
+    example: '0944 123 456',
+    description:
+      'For `phone`: the mobile number (national Syrian or international format). For `email`: the email address.',
+  })
   @Transform(toDestination)
-  @IsNotEmpty({ message: msg('validation.REQUIRED') })
   @IsDestination()
+  @IsNotEmpty({ message: msg('validation.REQUIRED') })
   destination: string;
 }
 
 export class VerifyOtpDto extends SendOtpDto {
-  @ApiProperty({ example: '123456' })
+  @ApiProperty({ example: '123456', description: 'The 6-digit code that was sent (or `devCode` while testing).' })
   @Transform(trim)
   @Matches(OTP, { message: msg('validation.OTP') })
+  @IsNotEmpty({ message: msg('validation.REQUIRED') })
   code: string;
 }
 
 export class ForgotPasswordDto extends SendOtpDto {}
 
 export class ResetPasswordDto {
-  @ApiProperty({ description: 'Token from the reset link' })
+  @ApiProperty({
+    example: 'Qm9vay1yZXNldC10b2tlbi1leGFtcGxlLTEyMzQ1Njc4OQ',
+    maxLength: 200,
+    description: 'The reset code from `POST /auth/password/forgot` (sent by SMS/email, or `devCode` while testing).',
+  })
+  @Transform(trim)
+  @MaxLength(200, { message: msg('validation.RESET_TOKEN') })
   @IsString({ message: msg('validation.STRING') })
   @IsNotEmpty({ message: msg('validation.REQUIRED') })
-  @MaxLength(200, { message: msg('validation.MAX_LENGTH') })
   token: string;
 
-  @ApiProperty({ minLength: 8, maxLength: 128 })
-  @IsString({ message: msg('validation.STRING') })
-  @MinLength(8, { message: msg('validation.MIN_LENGTH') })
+  @ApiProperty({
+    example: 'NewTurath2026',
+    minLength: 8,
+    maxLength: 128,
+    description: 'The new password: 8–128 characters with at least one letter and one number.',
+  })
+  @Matches(HAS_LETTER_AND_DIGIT, { message: msg('validation.PASSWORD_WEAK') })
   @MaxLength(128, { message: msg('validation.MAX_LENGTH') })
+  @MinLength(8, { message: msg('validation.MIN_LENGTH') })
+  @IsString({ message: msg('validation.STRING') })
+  @IsNotEmpty({ message: msg('validation.REQUIRED') })
   password: string;
 }
 
 export class UpdatePreferencesDto {
-  @ApiPropertyOptional({ enum: LOCALES })
+  @ApiPropertyOptional({ enum: LOCALES, example: 'ar', description: 'Interface language. `ar` switches to right-to-left.' })
+  @IsIn(LOCALES, { message: msg('validation.LOCALE') })
   @IsOptional()
-  @IsIn(LOCALES, { message: msg('validation.ONE_OF') })
   locale?: Locale;
 
-  @ApiPropertyOptional({ enum: THEMES })
+  @ApiPropertyOptional({ enum: THEMES, example: 'dark', description: '`system` follows the device setting.' })
+  @IsIn(THEMES, { message: msg('validation.THEME') })
   @IsOptional()
-  @IsIn(THEMES, { message: msg('validation.ONE_OF') })
   theme?: Theme;
 }
 
 // ───────────────────────────── responses (Swagger) ─────────────────────────────
 
 export class OtpDispatchDto implements OtpDispatch {
-  @ApiProperty({ enum: AUTH_CHANNELS }) channel: AuthChannel;
-  @ApiProperty({ example: '••• 456' }) destination: string;
-  @ApiProperty({ example: 300 }) expiresInSeconds: number;
-  @ApiProperty({ example: 60 }) resendInSeconds: number;
-  @ApiPropertyOptional({ description: 'Local development only (OTP_DEV_ECHO=true)' }) devCode?: string;
+  @ApiProperty({ enum: AUTH_CHANNELS, description: 'Where the code was sent.' }) channel: AuthChannel;
+  @ApiProperty({ example: '••• 456', description: 'Masked phone or email, safe to show on screen.' })
+  destination: string;
+  @ApiProperty({ example: 300, description: 'Seconds until the code expires.' }) expiresInSeconds: number;
+  @ApiProperty({ example: 60, description: 'Seconds before another code can be requested.' }) resendInSeconds: number;
+  @ApiPropertyOptional({
+    example: '123456',
+    description: 'Temporary, development only (`OTP_DEV_ECHO=true`): the code itself, until SMS/email delivery is live.',
+  })
+  devCode?: string;
 }
 
 export class UserDto implements UserView {
   @ApiProperty({ format: 'uuid' }) id: string;
-  @ApiProperty() fullName: string;
-  @ApiProperty({ nullable: true, type: String }) email: string | null;
-  @ApiProperty({ example: '+963944123456' }) phone: string;
+  @ApiProperty({ example: 'Rami Haddad' }) fullName: string;
+  @ApiProperty({ nullable: true, type: String, example: 'rami.haddad@example.com' }) email: string | null;
+  @ApiProperty({ example: '+963944123456', description: 'E.164' }) phone: string;
   @ApiProperty({ nullable: true, type: String, example: 'SY' }) phoneCountry: string | null;
   @ApiProperty({ nullable: true, type: String, example: '1994-05-17' }) dateOfBirth: string | null;
   @ApiProperty({ nullable: true, type: String, example: 'SY' }) nationality: string | null;
-  @ApiProperty({ enum: USER_ROLES }) role: UserRole;
-  @ApiProperty({ enum: PROVIDER_TYPES, nullable: true, description: 'Null for tourists' })
+  @ApiProperty({ enum: USER_ROLES, description: 'Tourists are `TOURIST`; provider signups are `PROVIDER_OWNER`.' })
+  role: UserRole;
+  @ApiProperty({ enum: PROVIDER_TYPES, nullable: true, description: 'Kind of business; null for tourists.' })
   providerType: ProviderType | null;
-  @ApiProperty({ minimum: 0, maximum: 100 }) reliabilityScore: number;
-  @ApiProperty({ enum: LOCALES }) locale: Locale;
-  @ApiProperty({ enum: THEMES }) theme: Theme;
-  @ApiProperty() phoneVerified: boolean;
-  @ApiProperty() emailVerified: boolean;
+  @ApiProperty({ minimum: 0, maximum: 100, example: 100, description: 'Starts at 100; drops 30 per no-show.' })
+  reliabilityScore: number;
+  @ApiProperty({ enum: LOCALES, description: 'Saved interface language.' }) locale: Locale;
+  @ApiProperty({ enum: THEMES, description: 'Saved theme.' }) theme: Theme;
+  @ApiProperty({ description: 'The phone was confirmed with a code.' }) phoneVerified: boolean;
+  @ApiProperty({ description: 'The email was confirmed with a code.' }) emailVerified: boolean;
   @ApiProperty({ format: 'date-time' }) createdAt: string;
 }
 
 export class AuthResponseDto {
-  @ApiProperty() accessToken: string;
-  @ApiProperty({ example: 900 }) accessTokenExpiresIn: number;
+  @ApiProperty({ description: 'Send as `Authorization: Bearer <accessToken>`.' }) accessToken: string;
+  @ApiProperty({ example: 900, description: 'Seconds the access token stays valid.' }) accessTokenExpiresIn: number;
   @ApiProperty({ description: 'Long-lived token, returned with every sign-in (also set as an HttpOnly cookie).' })
   refreshToken: string;
   @ApiProperty({ format: 'date-time' }) refreshTokenExpiresAt: string;
@@ -352,30 +377,58 @@ export class AuthResponseDto {
 }
 
 export class SessionDto implements SessionView {
-  @ApiProperty({ format: 'uuid' }) id: string;
-  @ApiProperty({ nullable: true, type: String }) userAgent: string | null;
-  @ApiProperty({ nullable: true, type: String }) ip: string | null;
-  @ApiProperty({ format: 'date-time' }) createdAt: string;
-  @ApiProperty({ format: 'date-time' }) lastUsedAt: string;
-  @ApiProperty() current: boolean;
+  @ApiProperty({ format: 'uuid', description: 'Pass to `DELETE /auth/sessions/{id}` to sign that device out.' })
+  id: string;
+  @ApiProperty({ nullable: true, type: String, example: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)' })
+  userAgent: string | null;
+  @ApiProperty({ nullable: true, type: String, example: '203.0.113.7' }) ip: string | null;
+  @ApiProperty({ format: 'date-time', description: 'When this device signed in.' }) createdAt: string;
+  @ApiProperty({ format: 'date-time', description: 'Last sign-in activity on this device.' }) lastUsedAt: string;
+  @ApiProperty({ description: 'True for the device making this request.' }) current: boolean;
+}
+
+export class RevokedCountDto {
+  @ApiProperty({ example: 2, description: 'How many other devices were signed out.' }) revoked: number;
 }
 
 export class PreferencesDto {
   @ApiProperty({ enum: LOCALES }) locale: Locale;
   @ApiProperty({ enum: THEMES }) theme: Theme;
+  @ApiProperty({ enum: ['ltr', 'rtl'], description: 'Text direction for `locale` (`rtl` for Arabic).' })
+  dir: 'ltr' | 'rtl';
+}
+
+export class OptionDto {
+  @ApiProperty({ example: 'HOTEL', description: 'Value to send to the API.' }) code: string;
+  @ApiProperty({ example: 'Hotel', description: 'Label in the request language.' }) label: string;
+}
+
+export class LocaleOptionDto extends OptionDto {
   @ApiProperty({ enum: ['ltr', 'rtl'] }) dir: 'ltr' | 'rtl';
+}
+
+export class MetaDto {
+  @ApiProperty({ example: 'Turath' }) appName: string;
+  @ApiProperty({ type: [LocaleOptionDto] }) locales: LocaleOptionDto[];
+  @ApiProperty({ enum: LOCALES }) defaultLocale: Locale;
+  @ApiProperty({ type: [OptionDto] }) themes: OptionDto[];
+  @ApiProperty({ enum: THEMES }) defaultTheme: Theme;
+  @ApiProperty({ type: [String], example: ['SYP', 'USD'] }) currencies: string[];
+  @ApiProperty({ type: [OptionDto], description: 'Signup dropdown: Tourist / Provider.' }) accountTypes: OptionDto[];
+  @ApiProperty({ type: [OptionDto], description: 'Signup dropdown for providers.' }) providerTypes: OptionDto[];
 }
 
 export class FieldErrorDto {
   @ApiProperty({ example: 'email' }) field: string;
-  @ApiProperty({ type: [String], example: ['Enter a valid email address'] }) messages: string[];
+  @ApiProperty({ type: [String], example: ['Enter a valid email address.'] }) messages: string[];
 }
 
 export class ErrorResponseDto {
   @ApiProperty({ example: 400 }) statusCode: number;
-  @ApiProperty({ example: 'VALIDATION_FAILED' }) code: string;
-  @ApiProperty({ example: 'Some fields need your attention' }) message: string;
-  @ApiPropertyOptional({ type: [FieldErrorDto] }) errors?: FieldErrorDto[];
+  @ApiProperty({ example: 'VALIDATION_FAILED', description: 'Stable code to switch on in the client.' }) code: string;
+  @ApiProperty({ example: 'Some fields need your attention.', description: 'Translated (en / ar).' }) message: string;
+  @ApiPropertyOptional({ type: [FieldErrorDto], description: 'Only for `VALIDATION_FAILED`: one message per field.' })
+  errors?: FieldErrorDto[];
   @ApiProperty({ example: '/api/v1/auth/register' }) path: string;
   @ApiProperty({ format: 'date-time' }) timestamp: string;
 }

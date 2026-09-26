@@ -86,9 +86,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
   }
 }
 
-/** class-validator's built-in whitelist error has no i18n key of its own. */
+/** Errors raised outside our DTO decorators, which carry no i18n key of their own. */
 const BUILT_IN_CONSTRAINTS: Record<string, string> = {
   whitelistValidation: 'validation.UNKNOWN_FIELD',
+  isUuid: 'validation.ID', // ParseIdPipe on `:id` route params
 };
 
 /** Nested DTO errors become dotted paths: `items.0.price`. */

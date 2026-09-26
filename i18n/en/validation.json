@@ -15,5 +15,15 @@
   "PASSWORD_WEAK": "Use at least one letter and one number.",
   "ACCOUNT_TYPE": "Choose Tourist or Provider.",
   "PROVIDER_TYPE": "Choose a provider type: Restaurant, Hotel, Trip agency, Event manager or Tour guide.",
-  "PROVIDER_TYPE_NOT_ALLOWED": "Only providers choose a provider type. Remove this field for tourist accounts."
+  "PROVIDER_TYPE_NOT_ALLOWED": "Only providers choose a provider type. Remove this field for tourist accounts.",
+  "CHANNEL": "Choose phone or email.",
+  "LOCALE": "Choose English (en) or Arabic (ar).",
+  "THEME": "Choose light, dark or system.",
+  "ID": "Enter a valid ID.",
+  "RESET_TOKEN": "Paste the full reset code you received.",
+  "LIST": "Must be a list.",
+  "NO_DUPLICATES": "Remove the repeated values.",
+  "BOOLEAN": "Must be true or false.",
+  "ADMIN_ROLE": "Choose a role: Super admin, Admin, Moderator or Support.",
+  "ADMIN_PERMISSION": "Contains an unknown permission. See GET /admin/options for the allowed values."
 }
