@@ -59,3 +59,30 @@ model User {
   @@index([role])
   @@map("users")
 }
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  MODERATOR
+  SUPPORT
+}
+
+/// Back-office staff. Separate from `users`: no phone, no tourist profile.
+/// Created only through the private admin API (x-api-key).
+model Admin {
+  id           String    @id @default(uuid()) @db.Uuid
+  fullName     String    @map("full_name") @db.VarChar(100)
+  /// Stored lower-case
+  email        String    @unique @db.VarChar(150)
+  passwordHash String    @map("password_hash")
+  role         AdminRole @default(ADMIN)
+  /// Values from ADMIN_PERMISSIONS in libs/contracts
+  permissions  String[]  @default([])
+  lockedAt     DateTime? @map("locked_at") @db.Timestamptz(6)
+  lastLoginAt  DateTime? @map("last_login_at") @db.Timestamptz(6)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([role])
+  @@map("admins")
+}

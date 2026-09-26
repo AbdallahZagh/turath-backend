@@ -10,6 +10,8 @@ import { I18nModule, I18nValidationPipe } from 'nestjs-i18n';
 import { AllExceptionsFilter, gatewayEnvSchema, i18nOptions } from '@turath/common';
 import { IDENTITY_CLIENT, IDENTITY_QUEUE } from '@turath/contracts';
 import { REDIS_CLIENT, RedisModule, RedisThrottlerStorage, type RedisClient } from '@turath/redis';
+import { AdminController } from './admin/admin.controller.js';
+import { ApiKeyGuard } from './admin/api-key.guard.js';
 import { AuthController } from './auth/auth.controller.js';
 import { AuthCookies } from './auth/auth.cookies.js';
 import { JwtAuthGuard, RolesGuard } from './auth/auth.guards.js';
@@ -77,10 +79,11 @@ import { PreferencesController } from './preferences/preferences.controller.js';
       },
     ]),
   ],
-  controllers: [AuthController, PreferencesController, MetaController, HealthController],
+  controllers: [AuthController, PreferencesController, MetaController, HealthController, AdminController],
   providers: [
     AuthCookies,
     IdentityClient,
+    ApiKeyGuard,
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
     {
       provide: APP_PIPE,

@@ -25,6 +25,7 @@
     "db:migrate:dev": "npm run prisma:identity -- migrate dev",
     "db:migrate:deploy": "npm run prisma:identity -- migrate deploy",
     "postinstall": "npm run db:generate",
+    "admin:key": "node -e \"console.log(require('node:crypto').randomBytes(48).toString('base64url'))\"",
     "docker:up": "docker compose up -d --build",
     "docker:infra": "docker compose up -d postgres redis rabbitmq",
     "docker:down": "docker compose down"

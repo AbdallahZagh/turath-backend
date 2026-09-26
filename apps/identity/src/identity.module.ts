@@ -5,6 +5,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { identityEnvSchema } from '@turath/common';
 import { RedisModule } from '@turath/redis';
+import { AdminsController } from './admins/admins.controller.js';
+import { AdminsService } from './admins/admins.service.js';
 import { AuthService } from './auth/auth.service.js';
 import { IdentityController } from './auth/identity.controller.js';
 import { ConsoleOtpSender, OtpSender } from './otp/otp.sender.js';
@@ -34,12 +36,13 @@ import { UsersService } from './users/users.service.js';
       }),
     }),
   ],
-  controllers: [IdentityController],
+  controllers: [IdentityController, AdminsController],
   providers: [
     PrismaService,
     UsersService,
     OtpService,
     AuthService,
+    AdminsService,
     { provide: OtpSender, useClass: ConsoleOtpSender },
   ],
 })

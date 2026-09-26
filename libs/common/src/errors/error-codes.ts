@@ -34,6 +34,10 @@ export const ErrorCode = {
   REFRESH_TOKEN_INVALID: 'REFRESH_TOKEN_INVALID',
   REFRESH_TOKEN_REUSED: 'REFRESH_TOKEN_REUSED',
   REFRESH_RACE: 'REFRESH_RACE',
+
+  // Admin
+  ADMIN_NOT_FOUND: 'ADMIN_NOT_FOUND',
+  ADMIN_EMAIL_TAKEN: 'ADMIN_EMAIL_TAKEN',
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
@@ -65,6 +69,9 @@ export const ERROR_STATUS: Record<ErrorCode, HttpStatus> = {
   REFRESH_TOKEN_INVALID: HttpStatus.UNAUTHORIZED,
   REFRESH_TOKEN_REUSED: HttpStatus.UNAUTHORIZED,
   REFRESH_RACE: HttpStatus.CONFLICT,
+
+  ADMIN_NOT_FOUND: HttpStatus.NOT_FOUND,
+  ADMIN_EMAIL_TAKEN: HttpStatus.CONFLICT,
 };
 
 export function isErrorCode(value: unknown): value is ErrorCode {

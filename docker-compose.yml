@@ -90,6 +90,7 @@ services:
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
       TRUST_PROXY: ${TRUST_PROXY:-0}
       SWAGGER_ENABLED: ${SWAGGER_ENABLED:-true}
+      ADMIN_API_KEYS: ${ADMIN_API_KEYS:-}
     ports: ['4000:4000']
     depends_on:
       identity: { condition: service_healthy }

@@ -21,7 +21,20 @@ export const gatewayEnvSchema = baseEnvSchema.keys({
   THROTTLE_LIMIT: Joi.number().integer().positive().default(120),
   CACHE_TTL_SECONDS: Joi.number().integer().positive().default(60),
   RPC_TIMEOUT_MS: Joi.number().integer().positive().default(5000),
+  // Comma-separated; empty disables the admin API. Short keys are rejected so a typo can't open it.
+  ADMIN_API_KEYS: Joi.string()
+    .allow('')
+    .default('')
+    .custom((value: string, helpers) =>
+      parseApiKeys(value).every((key) => key.length >= 32)
+        ? value
+        : helpers.message({ custom: 'each ADMIN_API_KEYS entry must be at least 32 characters' }),
+    ),
 });
+
+export function parseApiKeys(value: unknown): string[] {
+  return typeof value === 'string' ? value.split(',').map((key) => key.trim()).filter(Boolean) : [];
+}
 
 export const identityEnvSchema = baseEnvSchema.keys({
   IDENTITY_DATABASE_URL: Joi.string().uri({ scheme: ['postgres', 'postgresql'] }).required(),
