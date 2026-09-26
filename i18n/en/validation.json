@@ -1,0 +1,13 @@
+{
+  "REQUIRED": "This field is required.",
+  "STRING": "Must be text.",
+  "EMAIL": "Enter a valid email address.",
+  "PHONE": "Enter a valid phone number.",
+  "MIN_LENGTH": "Must be at least {constraints.0} characters.",
+  "MAX_LENGTH": "Must be at most {constraints.0} characters.",
+  "DATE": "Enter a valid date (YYYY-MM-DD).",
+  "COUNTRY": "Choose a valid country.",
+  "OTP": "Enter the 6-digit code.",
+  "ONE_OF": "Must be one of: {constraints.0}.",
+  "UNKNOWN_FIELD": "This field is not allowed."
+}

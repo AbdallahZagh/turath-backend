@@ -1,0 +1,21 @@
+# dependencies / build
+node_modules
+dist
+coverage
+*.tsbuildinfo
+
+# generated Prisma clients (`npm run db:generate`)
+**/src/generated/
+
+# env
+.env
+.env.*
+!.env.example
+
+# logs / OS / editors
+*.log
+.DS_Store
+Thumbs.db
+.idea
+.vscode/*
+!.vscode/extensions.json

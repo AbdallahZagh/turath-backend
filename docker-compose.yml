@@ -1,0 +1,106 @@
+# Local stack.  Infra only:  docker compose up -d postgres redis rabbitmq
+#               Everything:  docker compose up -d --build
+# Values come from .env (see .env.example); the defaults below are for local use only.
+
+x-app-env: &app-env
+  NODE_ENV: ${NODE_ENV:-development}
+  REDIS_URL: redis://redis:6379
+  RABBITMQ_URL: amqp://${RABBITMQ_USER:-turath}:${RABBITMQ_PASSWORD:-turath}@rabbitmq:5672
+  JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev-only-access-secret-change-me-0123456789}
+  JWT_ACCESS_TTL_SECONDS: ${JWT_ACCESS_TTL_SECONDS:-900}
+  REFRESH_TTL_DAYS: ${REFRESH_TTL_DAYS:-30}
+
+x-identity-db: &identity-db
+  IDENTITY_DATABASE_URL: postgresql://${POSTGRES_USER:-turath}:${POSTGRES_PASSWORD:-turath}@postgres:5432/turath_identity
+
+services:
+  postgres:
+    image: postgis/postgis:17-3.5
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-turath}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-turath}
+      POSTGRES_DB: postgres
+    ports: ['5432:5432']
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-turath} -d turath_identity']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    # Sessions and rate-limit counters must never be evicted, so no LRU policy.
+    command: ['redis-server', '--appendonly', 'yes', '--maxmemory-policy', 'noeviction']
+    ports: ['6379:6379']
+    volumes: [redisdata:/data]
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-turath}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-turath}
+    ports: ['5672:5672', '15672:15672'] # 15672 = management UI
+    volumes: [rabbitdata:/var/lib/rabbitmq]
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  identity-migrate:
+    build: { context: ., target: migrate, args: { APP: identity } }
+    environment:
+      <<: *identity-db
+    depends_on:
+      postgres: { condition: service_healthy }
+    restart: 'no'
+
+  identity:
+    build: { context: ., target: runtime, args: { APP: identity } }
+    environment:
+      <<: [*app-env, *identity-db]
+      IDENTITY_HEALTH_PORT: 4001
+      OTP_DEV_ECHO: ${OTP_DEV_ECHO:-true}
+    depends_on:
+      identity-migrate: { condition: service_completed_successfully }
+      redis: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+    healthcheck:
+      test: ['CMD', 'node', '-e', "fetch('http://localhost:4001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  api-gateway:
+    build: { context: ., target: runtime, args: { APP: api-gateway } }
+    environment:
+      <<: *app-env
+      PORT: 4000
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      COOKIE_DOMAIN: ${COOKIE_DOMAIN:-}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      TRUST_PROXY: ${TRUST_PROXY:-0}
+      SWAGGER_ENABLED: ${SWAGGER_ENABLED:-true}
+    ports: ['4000:4000']
+    depends_on:
+      identity: { condition: service_healthy }
+    healthcheck:
+      test: ['CMD', 'node', '-e', "fetch('http://localhost:4000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  redisdata:
+  rabbitdata:

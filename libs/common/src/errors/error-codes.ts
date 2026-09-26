@@ -1,0 +1,86 @@
+import { HttpStatus } from '@nestjs/common';
+
+/**
+ * Stable, machine-readable error codes. The API never sends raw English to
+ * clients: each code is translated from `i18n/<lang>/errors.json`, and the
+ * frontend may also switch on `code` directly.
+ */
+export const ErrorCode = {
+  // Generic
+  VALIDATION_FAILED: 'VALIDATION_FAILED',
+  BAD_REQUEST: 'BAD_REQUEST',
+  UNAUTHORIZED: 'UNAUTHORIZED',
+  FORBIDDEN: 'FORBIDDEN',
+  NOT_FOUND: 'NOT_FOUND',
+  CONFLICT: 'CONFLICT',
+  TOO_MANY_REQUESTS: 'TOO_MANY_REQUESTS',
+  INTERNAL_ERROR: 'INTERNAL_ERROR',
+  SERVICE_UNAVAILABLE: 'SERVICE_UNAVAILABLE',
+
+  // Identity
+  INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
+  ACCOUNT_LOCKED: 'ACCOUNT_LOCKED',
+  PHONE_TAKEN: 'PHONE_TAKEN',
+  EMAIL_TAKEN: 'EMAIL_TAKEN',
+  USER_NOT_FOUND: 'USER_NOT_FOUND',
+  OTP_INVALID: 'OTP_INVALID',
+  OTP_EXPIRED: 'OTP_EXPIRED',
+  OTP_TOO_MANY_ATTEMPTS: 'OTP_TOO_MANY_ATTEMPTS',
+  OTP_COOLDOWN: 'OTP_COOLDOWN',
+  RESET_TOKEN_INVALID: 'RESET_TOKEN_INVALID',
+  SESSION_EXPIRED: 'SESSION_EXPIRED',
+  SESSION_NOT_FOUND: 'SESSION_NOT_FOUND',
+  REFRESH_TOKEN_MISSING: 'REFRESH_TOKEN_MISSING',
+  REFRESH_TOKEN_INVALID: 'REFRESH_TOKEN_INVALID',
+  REFRESH_TOKEN_REUSED: 'REFRESH_TOKEN_REUSED',
+  REFRESH_RACE: 'REFRESH_RACE',
+} as const;
+
+export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
+
+export const ERROR_STATUS: Record<ErrorCode, HttpStatus> = {
+  VALIDATION_FAILED: HttpStatus.BAD_REQUEST,
+  BAD_REQUEST: HttpStatus.BAD_REQUEST,
+  UNAUTHORIZED: HttpStatus.UNAUTHORIZED,
+  FORBIDDEN: HttpStatus.FORBIDDEN,
+  NOT_FOUND: HttpStatus.NOT_FOUND,
+  CONFLICT: HttpStatus.CONFLICT,
+  TOO_MANY_REQUESTS: HttpStatus.TOO_MANY_REQUESTS,
+  INTERNAL_ERROR: HttpStatus.INTERNAL_SERVER_ERROR,
+  SERVICE_UNAVAILABLE: HttpStatus.SERVICE_UNAVAILABLE,
+
+  INVALID_CREDENTIALS: HttpStatus.UNAUTHORIZED,
+  ACCOUNT_LOCKED: HttpStatus.FORBIDDEN,
+  PHONE_TAKEN: HttpStatus.CONFLICT,
+  EMAIL_TAKEN: HttpStatus.CONFLICT,
+  USER_NOT_FOUND: HttpStatus.NOT_FOUND,
+  OTP_INVALID: HttpStatus.BAD_REQUEST,
+  OTP_EXPIRED: HttpStatus.BAD_REQUEST,
+  OTP_TOO_MANY_ATTEMPTS: HttpStatus.TOO_MANY_REQUESTS,
+  OTP_COOLDOWN: HttpStatus.TOO_MANY_REQUESTS,
+  RESET_TOKEN_INVALID: HttpStatus.BAD_REQUEST,
+  SESSION_EXPIRED: HttpStatus.UNAUTHORIZED,
+  SESSION_NOT_FOUND: HttpStatus.NOT_FOUND,
+  REFRESH_TOKEN_MISSING: HttpStatus.UNAUTHORIZED,
+  REFRESH_TOKEN_INVALID: HttpStatus.UNAUTHORIZED,
+  REFRESH_TOKEN_REUSED: HttpStatus.UNAUTHORIZED,
+  REFRESH_RACE: HttpStatus.CONFLICT,
+};
+
+export function isErrorCode(value: unknown): value is ErrorCode {
+  return typeof value === 'string' && value in ERROR_STATUS;
+}
+
+const STATUS_FALLBACK: Partial<Record<number, ErrorCode>> = {
+  400: ErrorCode.BAD_REQUEST,
+  401: ErrorCode.UNAUTHORIZED,
+  403: ErrorCode.FORBIDDEN,
+  404: ErrorCode.NOT_FOUND,
+  409: ErrorCode.CONFLICT,
+  429: ErrorCode.TOO_MANY_REQUESTS,
+  503: ErrorCode.SERVICE_UNAVAILABLE,
+};
+
+export function errorCodeForStatus(status: number): ErrorCode {
+  return STATUS_FALLBACK[status] ?? (status >= 500 ? ErrorCode.INTERNAL_ERROR : ErrorCode.BAD_REQUEST);
+}
