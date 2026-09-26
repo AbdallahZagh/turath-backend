@@ -6,3 +6,4 @@ export * from './i18n/i18n.options.js';
 export * from './phone.js';
 export * from './preferences.js';
 export * from './rpc/rpc.js';
+export * from './validation/index.js';
