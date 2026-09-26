@@ -7,7 +7,7 @@ import { AdminsService } from './admins.service.js';
 /** RabbitMQ handlers for back-office accounts. The gateway checks the API key and validates input. */
 @Controller()
 @UseFilters(RpcAllExceptionsFilter)
-export class AdminsController {
+export class AdminsHandler {
   constructor(private readonly admins: AdminsService) {}
 
   @MessagePattern(AdminPatterns.CREATE)

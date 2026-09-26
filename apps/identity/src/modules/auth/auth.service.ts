@@ -18,11 +18,12 @@ import type {
   RegisterPayload,
 } from '@turath/contracts';
 import { REDIS_CLIENT, SessionStore, type RedisClient } from '@turath/redis';
-import { Prisma, type User } from '../generated/prisma/client.js';
+import { Prisma, type User } from '../../generated/prisma/client.js';
 import { OtpSender } from '../otp/otp.sender.js';
 import { OtpService } from '../otp/otp.service.js';
-import { PrismaService } from '../prisma/prisma.service.js';
-import { toUserView, UsersService } from '../users/users.service.js';
+import { PrismaService } from '../../core/prisma/prisma.service.js';
+import { toUserView } from '../users/user.mapper.js';
+import { UsersService } from '../users/users.service.js';
 
 const resetKey = (token: string) => `pwd-reset:${createHash('sha256').update(token).digest('hex')}`;
 
@@ -189,7 +190,11 @@ export class AuthService {
     return this.jwt.signAsync(claims, { expiresIn: this.accessTtlSeconds });
   }
 
-  private async dispatchOtp(channel: AuthChannel, destination: string, locale: User['preferredLocale']): Promise<OtpDispatch> {
+  private async dispatchOtp(
+    channel: AuthChannel,
+    destination: string,
+    locale: User['preferredLocale'],
+  ): Promise<OtpDispatch> {
     const code = await this.otp.issue(channel, destination);
     await this.sender.send({ kind: 'otp', channel, destination, code, locale });
     return { ...this.dispatch(channel, destination), ...(this.devEcho && { devCode: code }) };

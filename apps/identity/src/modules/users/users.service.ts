@@ -3,31 +3,11 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { Cache } from 'cache-manager';
 import { ErrorCode, rpcError, type Locale, type Theme } from '@turath/common';
 import type { UserView } from '@turath/contracts';
-import type { User } from '../generated/prisma/client.js';
-import { PrismaService } from '../prisma/prisma.service.js';
+import { PrismaService } from '../../core/prisma/prisma.service.js';
+import { toUserView } from './user.mapper.js';
 
 const USER_CACHE_TTL_MS = 5 * 60 * 1000;
 const cacheKey = (id: string) => `user:${id}`;
-
-export function toUserView(user: User): UserView {
-  return {
-    id: user.id,
-    fullName: user.fullName,
-    email: user.email,
-    phone: user.phone,
-    phoneCountry: user.phoneCountry,
-    dateOfBirth: user.dateOfBirth?.toISOString().slice(0, 10) ?? null,
-    nationality: user.nationality,
-    role: user.role,
-    providerType: user.providerType,
-    reliabilityScore: user.reliabilityScore,
-    locale: user.preferredLocale,
-    theme: user.preferredTheme,
-    phoneVerified: user.phoneVerifiedAt !== null,
-    emailVerified: user.emailVerifiedAt !== null,
-    createdAt: user.createdAt.toISOString(),
-  };
-}
 
 /**
  * Reads go through a Redis cache (cache-manager + Keyv) because the gateway

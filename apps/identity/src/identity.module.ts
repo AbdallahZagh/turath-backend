@@ -5,17 +5,16 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { identityEnvSchema } from '@turath/common';
 import { RedisModule } from '@turath/redis';
-import { AdminsController } from './admins/admins.controller.js';
-import { AdminsService } from './admins/admins.service.js';
-import { AuthService } from './auth/auth.service.js';
-import { IdentityController } from './auth/identity.controller.js';
-import { ConsoleOtpSender, OtpSender } from './otp/otp.sender.js';
-import { OtpService } from './otp/otp.service.js';
-import { PrismaService } from './prisma/prisma.service.js';
-import { UsersService } from './users/users.service.js';
+import { CoreModule } from './core/core.module.js';
+import { AdminsModule } from './modules/admins/admins.module.js';
+import { AuthModule } from './modules/auth/auth.module.js';
+import { HealthModule } from './modules/health/health.module.js';
+import { SessionsModule } from './modules/sessions/sessions.module.js';
+import { UsersModule } from './modules/users/users.module.js';
 
 @Module({
   imports: [
+    // ── platform ──
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env'],
@@ -30,20 +29,20 @@ import { UsersService } from './users/users.service.js';
       }),
     }),
     JwtModule.registerAsync({
+      global: true,
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         secret: config.getOrThrow<string>('JWT_ACCESS_SECRET'),
       }),
     }),
-  ],
-  controllers: [IdentityController, AdminsController],
-  providers: [
-    PrismaService,
-    UsersService,
-    OtpService,
-    AuthService,
-    AdminsService,
-    { provide: OtpSender, useClass: ConsoleOtpSender },
+    CoreModule,
+
+    // ── areas (each owns its RabbitMQ handlers) ──
+    AuthModule,
+    UsersModule,
+    SessionsModule,
+    AdminsModule,
+    HealthModule,
   ],
 })
 export class IdentityModule {}

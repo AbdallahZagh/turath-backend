@@ -2,16 +2,20 @@ import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { isRpcErrorPayload, type ErrorCode } from '@turath/common';
 import { REDIS_CLIENT, type RedisClient } from '@turath/redis';
-import { AdminsController } from '../../src/admins/admins.controller.js';
-import { IdentityController } from '../../src/auth/identity.controller.js';
+import { PrismaService } from '../../src/core/prisma/prisma.service.js';
 import { IdentityModule } from '../../src/identity.module.js';
-import { PrismaService } from '../../src/prisma/prisma.service.js';
+import { AdminsHandler } from '../../src/modules/admins/admins.handler.js';
+import { AuthHandler } from '../../src/modules/auth/auth.handler.js';
+import { SessionsHandler } from '../../src/modules/sessions/sessions.handler.js';
+import { UsersHandler } from '../../src/modules/users/users.handler.js';
 
 export type IdentityHarness = {
   app: INestApplication;
   /** The RabbitMQ handlers, called directly with the same payloads the gateway sends. */
-  identity: IdentityController;
-  admins: AdminsController;
+  auth: AuthHandler;
+  users: UsersHandler;
+  sessions: SessionsHandler;
+  admins: AdminsHandler;
   prisma: PrismaService;
   redis: RedisClient;
   reset: () => Promise<void>;
@@ -33,8 +37,10 @@ export async function createIdentity(): Promise<IdentityHarness> {
 
   return {
     app,
-    identity: app.get(IdentityController),
-    admins: app.get(AdminsController),
+    auth: app.get(AuthHandler),
+    users: app.get(UsersHandler),
+    sessions: app.get(SessionsHandler),
+    admins: app.get(AdminsHandler),
     prisma,
     redis,
     reset: async () => {

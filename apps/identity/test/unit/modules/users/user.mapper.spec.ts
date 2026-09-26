@@ -1,5 +1,5 @@
-import type { User } from '../../../src/generated/prisma/client.js';
-import { toUserView } from '../../../src/users/users.service.js';
+import type { User } from '../../../../src/generated/prisma/client.js';
+import { toUserView } from '../../../../src/modules/users/user.mapper.js';
 
 const user: User = {
   id: '11111111-1111-4111-8111-111111111111',

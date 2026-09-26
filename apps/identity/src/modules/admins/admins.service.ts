@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import argon2 from 'argon2';
 import { ErrorCode, rpcError } from '@turath/common';
 import type { AdminCreatePayload, AdminPermission, AdminUpdatePayload, AdminView } from '@turath/contracts';
-import { type Admin, Prisma } from '../generated/prisma/client.js';
-import { PrismaService } from '../prisma/prisma.service.js';
+import { type Admin, Prisma } from '../../generated/prisma/client.js';
+import { PrismaService } from '../../core/prisma/prisma.service.js';
 
 export function toAdminView(admin: Admin): AdminView {
   return {
