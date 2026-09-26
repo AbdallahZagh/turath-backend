@@ -5,9 +5,16 @@
 
 ARG NODE_IMAGE=node:22-bookworm-slim
 
-# ── deps: full install (build tools, prisma CLI) ──────────────────────────
-FROM ${NODE_IMAGE} AS deps
+# ── installer: same npm major as the one that wrote package-lock.json ────
+FROM ${NODE_IMAGE} AS installer
+# openssl: needed by the Prisma CLI (migrations) in the build / migrate stages.
+RUN apt-get update && apt-get install -y --no-install-recommends openssl \
+    && rm -rf /var/lib/apt/lists/* \
+    && npm install -g npm@11.6.1 && npm cache clean --force
 WORKDIR /app
+
+# ── deps: full install (build tools, prisma CLI) ──────────────────────────
+FROM installer AS deps
 COPY package.json package-lock.json ./
 # Scripts are skipped here because postinstall needs the Prisma schema; the client is generated in `build`.
 RUN npm ci --ignore-scripts
@@ -23,8 +30,7 @@ FROM build AS migrate
 CMD ["npm", "run", "db:migrate:deploy"]
 
 # ── prod-deps: runtime dependencies only ──────────────────────────────────
-FROM ${NODE_IMAGE} AS prod-deps
-WORKDIR /app
+FROM installer AS prod-deps
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
 
