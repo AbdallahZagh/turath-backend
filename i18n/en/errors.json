@@ -10,6 +10,7 @@
   "SERVICE_UNAVAILABLE": "The service is temporarily unavailable. Please try again shortly.",
   "INVALID_CREDENTIALS": "The email or password is incorrect.",
   "ACCOUNT_LOCKED": "This account is locked. Please contact support.",
+  "ACCOUNT_NOT_VERIFIED": "Please verify your phone number to finish signing up.",
   "PHONE_TAKEN": "An account with this phone number already exists.",
   "EMAIL_TAKEN": "An account with this email already exists.",
   "USER_NOT_FOUND": "Account not found.",

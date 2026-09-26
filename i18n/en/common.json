@@ -4,5 +4,12 @@
   "LOCALE_ar": "العربية",
   "THEME_light": "Light",
   "THEME_dark": "Dark",
-  "THEME_system": "Match device"
+  "THEME_system": "Match device",
+  "ACCOUNT_TYPE_TOURIST": "Tourist",
+  "ACCOUNT_TYPE_PROVIDER": "Provider",
+  "PROVIDER_TYPE_RESTAURANT": "Restaurant",
+  "PROVIDER_TYPE_HOTEL": "Hotel",
+  "PROVIDER_TYPE_TRIP_AGENCY": "Trip agency",
+  "PROVIDER_TYPE_EVENT_MANAGER": "Event manager",
+  "PROVIDER_TYPE_TOUR_GUIDE": "Tour guide"
 }

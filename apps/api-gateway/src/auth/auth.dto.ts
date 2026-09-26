@@ -18,9 +18,13 @@ import {
 import { i18nValidationMessage as msg } from 'nestjs-i18n';
 import { LOCALES, normalizeEmail, normalizePhone, THEMES, type Locale, type Theme } from '@turath/common';
 import {
+  ACCOUNT_TYPES,
   AUTH_CHANNELS,
+  PROVIDER_TYPES,
   USER_ROLES,
+  type AccountType,
   type AuthChannel,
+  type ProviderType,
   type OtpDispatch,
   type SessionView,
   type UserRole,
@@ -33,6 +37,13 @@ const OTP = /^\d{6}$/;
 const trim = ({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim() : value);
 const toEmail = ({ value }: { value: unknown }) => (typeof value === 'string' ? normalizeEmail(value) : value);
 const toUpper = ({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim().toUpperCase() : value);
+
+/** Phone in national or international format → E.164, read with the sibling `phoneCountry`. */
+const toPhoneForCountry = ({ value, obj }: { value: unknown; obj: { phoneCountry?: unknown } }) => {
+  if (typeof value !== 'string') return value;
+  const country = typeof obj.phoneCountry === 'string' ? obj.phoneCountry.trim().toUpperCase() : undefined;
+  return normalizePhone(value, country) ?? value.trim();
+};
 
 /** Destination depends on the channel: E.164 phone (Syrian by default) or lower-case email. */
 const toDestination = ({ value, obj }: { value: unknown; obj: { channel?: unknown } }) => {
@@ -65,62 +76,194 @@ function IsDestination(): PropertyDecorator {
     });
 }
 
+/** Letters in any script (Arabic, Latin…) incl. diacritics, joined by spaces, hyphens, apostrophes or dots. */
+const PERSON_NAME = /^[\p{L}\p{M}]+(?:[\s'’.-]+[\p{L}\p{M}]+)*\.?$/u;
+const HAS_LETTER_AND_DIGIT = /^(?=.*\p{L})(?=.*\d)/u;
+const OLDEST_BIRTH_DATE = '1900-01-01';
+
+/** A YYYY-MM-DD date strictly before today and not before 1900. Format errors are reported by IsISO8601. */
+function IsPastBirthDate(): PropertyDecorator {
+  return (target, propertyName) =>
+    registerDecorator({
+      name: 'isPastBirthDate',
+      target: target.constructor,
+      propertyName: String(propertyName),
+      options: { message: msg('validation.DATE_OF_BIRTH') },
+      validator: {
+        validate(value: unknown): boolean {
+          if (typeof value !== 'string') return false;
+          const today = new Date().toISOString().slice(0, 10);
+          return value >= OLDEST_BIRTH_DATE && value < today;
+        },
+      },
+    });
+}
+
+/** `providerType` is required (and must be a known type) for providers, and must be left out for tourists. */
+function IsProviderTypeForAccount(): PropertyDecorator {
+  return (target, propertyName) =>
+    registerDecorator({
+      name: 'isProviderTypeForAccount',
+      target: target.constructor,
+      propertyName: String(propertyName),
+      options: {
+        message: (args: ValidationArguments) => {
+          const { accountType } = args.object as { accountType?: unknown };
+          if (accountType === 'TOURIST') return msg('validation.PROVIDER_TYPE_NOT_ALLOWED')(args);
+          return args.value == null || args.value === ''
+            ? msg('validation.REQUIRED')(args)
+            : msg('validation.PROVIDER_TYPE')(args);
+        },
+      },
+      validator: {
+        validate(value: unknown, args: ValidationArguments): boolean {
+          const { accountType } = args.object as { accountType?: unknown };
+          if (accountType === 'PROVIDER') return (PROVIDER_TYPES as readonly unknown[]).includes(value);
+          if (accountType === 'TOURIST') return value == null;
+          return true; // `accountType` reports its own error
+        },
+      },
+    });
+}
+
 // ───────────────────────────── requests ─────────────────────────────
 
+// class-validator runs a property's rules bottom-up and, with `stopAtFirstError`,
+// reports only the first failure. So each field lists its rules from most specific
+// (top) to "required" (bottom): a missing field gets exactly one "required" message.
 export class RegisterDto {
-  @ApiProperty({ example: 'Rami Haddad' })
+  @ApiProperty({
+    enum: ACCOUNT_TYPES,
+    example: 'TOURIST',
+    description: '`TOURIST` books experiences. `PROVIDER` offers them (account role becomes `PROVIDER_OWNER`).',
+  })
+  @IsIn(ACCOUNT_TYPES, { message: msg('validation.ACCOUNT_TYPE') })
+  @IsNotEmpty({ message: msg('validation.REQUIRED') })
+  accountType: AccountType;
+
+  @ApiProperty({
+    enum: PROVIDER_TYPES,
+    nullable: true,
+    required: false,
+    example: 'HOTEL',
+    description:
+      'Required when `accountType` is `PROVIDER`; leave it out (or send null) for `TOURIST`. ' +
+      'Dropdown options with translated labels: `GET /api/v1/meta` → `providerTypes`.',
+  })
+  @IsProviderTypeForAccount()
+  providerType?: ProviderType | null;
+
+  @ApiProperty({
+    example: 'Rami Haddad',
+    minLength: 2,
+    maxLength: 100,
+    description: 'Full name. Letters in any language; spaces, hyphens, apostrophes and dots are allowed.',
+  })
   @Transform(trim)
-  @IsString({ message: msg('validation.STRING') })
-  @MinLength(2, { message: msg('validation.MIN_LENGTH') })
+  @Matches(PERSON_NAME, { message: msg('validation.NAME') })
   @MaxLength(100, { message: msg('validation.MAX_LENGTH') })
+  @MinLength(2, { message: msg('validation.MIN_LENGTH') })
+  @IsString({ message: msg('validation.STRING') })
+  @IsNotEmpty({ message: msg('validation.REQUIRED') })
   name: string;
 
-  @ApiProperty({ example: '1994-05-17', description: 'ISO date (YYYY-MM-DD)' })
+  @ApiProperty({
+    example: '1994-05-17',
+    format: 'date',
+    description: 'ISO date `YYYY-MM-DD`. Must be in the past and not before 1900-01-01.',
+  })
+  @IsPastBirthDate()
   @IsISO8601({ strict: true }, { message: msg('validation.DATE') })
+  @IsNotEmpty({ message: msg('validation.REQUIRED') })
   dateOfBirth: string;
 
-  @ApiProperty({ example: 'SY', description: 'ISO 3166-1 alpha-2' })
+  @ApiProperty({ example: 'SY', description: 'Nationality as an ISO 3166-1 alpha-2 country code (case-insensitive).' })
   @Transform(toUpper)
   @IsISO31661Alpha2({ message: msg('validation.COUNTRY') })
+  @IsNotEmpty({ message: msg('validation.REQUIRED') })
   nationality: string;
 
-  @ApiProperty({ example: 'SY', description: 'Country of the phone number, ISO 3166-1 alpha-2' })
+  @ApiProperty({
+    example: 'SY',
+    description: 'Country the phone number belongs to, ISO 3166-1 alpha-2. Used to read national-format numbers.',
+  })
   @Transform(toUpper)
   @IsISO31661Alpha2({ message: msg('validation.COUNTRY') })
+  @IsNotEmpty({ message: msg('validation.REQUIRED') })
   phoneCountry: string;
 
-  @ApiProperty({ example: '0944 123 456', description: 'National or international format; stored as E.164' })
-  @Transform(({ value, obj }: { value: unknown; obj: { phoneCountry?: string } }) =>
-    typeof value === 'string' ? (normalizePhone(value, obj.phoneCountry) ?? value.trim()) : value,
-  )
-  @IsNotEmpty({ message: msg('validation.REQUIRED') })
+  @ApiProperty({
+    example: '0944 123 456',
+    description: 'Mobile number in national (`0944 123 456`) or international (`+963944123456`) format; stored as E.164.',
+  })
+  @Transform(toPhoneForCountry)
   @Matches(E164, { message: msg('validation.PHONE') })
+  @IsNotEmpty({ message: msg('validation.REQUIRED') })
   phone: string;
 
-  @ApiProperty({ example: 'rami.haddad@example.com' })
+  @ApiProperty({ example: 'rami.haddad@example.com', maxLength: 150, description: 'Stored lower-case.' })
   @Transform(toEmail)
-  @IsEmail({}, { message: msg('validation.EMAIL') })
   @MaxLength(150, { message: msg('validation.MAX_LENGTH') })
+  @IsEmail({}, { message: msg('validation.EMAIL') })
+  @IsNotEmpty({ message: msg('validation.REQUIRED') })
   email: string;
 
-  @ApiProperty({ minLength: 8, maxLength: 128 })
-  @IsString({ message: msg('validation.STRING') })
-  @MinLength(8, { message: msg('validation.MIN_LENGTH') })
+  @ApiProperty({
+    example: 'Turath2026',
+    minLength: 8,
+    maxLength: 128,
+    description: '8–128 characters with at least one letter and one number.',
+  })
+  @Matches(HAS_LETTER_AND_DIGIT, { message: msg('validation.PASSWORD_WEAK') })
   @MaxLength(128, { message: msg('validation.MAX_LENGTH') })
+  @MinLength(8, { message: msg('validation.MIN_LENGTH') })
+  @IsString({ message: msg('validation.STRING') })
+  @IsNotEmpty({ message: msg('validation.REQUIRED') })
   password: string;
 }
 
 export class LoginEmailDto {
-  @ApiProperty({ example: 'rami.haddad@example.com' })
+  @ApiProperty({
+    example: 'rami.haddad@example.com',
+    maxLength: 150,
+    description: 'The email used at signup (case-insensitive).',
+  })
   @Transform(toEmail)
+  @MaxLength(150, { message: msg('validation.MAX_LENGTH') })
   @IsEmail({}, { message: msg('validation.EMAIL') })
+  @IsNotEmpty({ message: msg('validation.REQUIRED') })
   email: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'Turath2026', maxLength: 128, description: 'The account password.' })
+  @MaxLength(128, { message: msg('validation.MAX_LENGTH') })
   @IsString({ message: msg('validation.STRING') })
   @IsNotEmpty({ message: msg('validation.REQUIRED') })
-  @MaxLength(128, { message: msg('validation.MAX_LENGTH') })
   password: string;
+}
+
+export class LoginPhoneDto {
+  @ApiProperty({ example: 'SY', description: 'Country the phone number belongs to, ISO 3166-1 alpha-2.' })
+  @Transform(toUpper)
+  @IsISO31661Alpha2({ message: msg('validation.COUNTRY') })
+  @IsNotEmpty({ message: msg('validation.REQUIRED') })
+  phoneCountry: string;
+
+  @ApiProperty({
+    example: '0944 123 456',
+    description: 'The number used at signup, in national (`0944 123 456`) or international (`+963944123456`) format.',
+  })
+  @Transform(toPhoneForCountry)
+  @Matches(E164, { message: msg('validation.PHONE') })
+  @IsNotEmpty({ message: msg('validation.REQUIRED') })
+  phone: string;
+}
+
+export class LoginPhoneVerifyDto extends LoginPhoneDto {
+  @ApiProperty({ example: '123456', description: 'The 6-digit code sent by SMS (or `devCode` while testing).' })
+  @Transform(trim)
+  @Matches(OTP, { message: msg('validation.OTP') })
+  @IsNotEmpty({ message: msg('validation.REQUIRED') })
+  code: string;
 }
 
 export class SendOtpDto {
@@ -158,14 +301,6 @@ export class ResetPasswordDto {
   password: string;
 }
 
-export class RefreshDto {
-  @ApiPropertyOptional({ description: 'Mobile clients only. Web sends the HttpOnly cookie instead.' })
-  @IsOptional()
-  @IsString({ message: msg('validation.STRING') })
-  @MaxLength(200, { message: msg('validation.MAX_LENGTH') })
-  refreshToken?: string;
-}
-
 export class UpdatePreferencesDto {
   @ApiPropertyOptional({ enum: LOCALES })
   @IsOptional()
@@ -197,6 +332,8 @@ export class UserDto implements UserView {
   @ApiProperty({ nullable: true, type: String, example: '1994-05-17' }) dateOfBirth: string | null;
   @ApiProperty({ nullable: true, type: String, example: 'SY' }) nationality: string | null;
   @ApiProperty({ enum: USER_ROLES }) role: UserRole;
+  @ApiProperty({ enum: PROVIDER_TYPES, nullable: true, description: 'Null for tourists' })
+  providerType: ProviderType | null;
   @ApiProperty({ minimum: 0, maximum: 100 }) reliabilityScore: number;
   @ApiProperty({ enum: LOCALES }) locale: Locale;
   @ApiProperty({ enum: THEMES }) theme: Theme;
@@ -208,7 +345,8 @@ export class UserDto implements UserView {
 export class AuthResponseDto {
   @ApiProperty() accessToken: string;
   @ApiProperty({ example: 900 }) accessTokenExpiresIn: number;
-  @ApiPropertyOptional({ description: 'Only returned when `X-Client-Type: mobile` is sent' }) refreshToken?: string;
+  @ApiProperty({ description: 'Long-lived token, returned with every sign-in (also set as an HttpOnly cookie).' })
+  refreshToken: string;
   @ApiProperty({ format: 'date-time' }) refreshTokenExpiresAt: string;
   @ApiProperty({ type: UserDto }) user: UserDto;
 }

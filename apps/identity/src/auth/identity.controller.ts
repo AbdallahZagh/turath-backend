@@ -11,7 +11,6 @@ import {
   type PasswordForgotPayload,
   type PasswordResetPayload,
   type PreferencesUpdatePayload,
-  type RefreshPayload,
   type RegisterPayload,
   type SessionRef,
   type SessionView,
@@ -48,7 +47,7 @@ export class IdentityController {
   }
 
   @MessagePattern(IdentityPatterns.LOGIN_EMAIL)
-  loginEmail(@Payload() payload: LoginEmailPayload): Promise<OtpDispatch> {
+  loginEmail(@Payload() payload: LoginEmailPayload): Promise<AuthResult> {
     return this.auth.loginWithEmail(payload);
   }
 
@@ -60,11 +59,6 @@ export class IdentityController {
   @MessagePattern(IdentityPatterns.OTP_VERIFY)
   verifyOtp(@Payload() payload: OtpVerifyPayload): Promise<AuthResult> {
     return this.auth.verifyOtp(payload);
-  }
-
-  @MessagePattern(IdentityPatterns.TOKEN_REFRESH)
-  refresh(@Payload() payload: RefreshPayload): Promise<AuthResult> {
-    return this.auth.refresh(payload);
   }
 
   @MessagePattern(IdentityPatterns.LOGOUT)

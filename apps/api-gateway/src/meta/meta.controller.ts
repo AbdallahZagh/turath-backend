@@ -3,6 +3,7 @@ import { Controller, Get, UseInterceptors } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { I18n, type I18nContext } from 'nestjs-i18n';
 import { DEFAULT_LOCALE, DEFAULT_THEME, LOCALES, THEMES } from '@turath/common';
+import { ACCOUNT_TYPES, PROVIDER_TYPES } from '@turath/contracts';
 import { Public } from '../auth/auth.decorators.js';
 import { HttpCacheInterceptor } from '../infra/http-cache.interceptor.js';
 
@@ -17,7 +18,7 @@ import { HttpCacheInterceptor } from '../infra/http-cache.interceptor.js';
 export class MetaController {
   @Get()
   @CacheTTL(60 * 60 * 1000)
-  @ApiOperation({ summary: 'Supported languages, themes and currencies' })
+  @ApiOperation({ summary: 'Supported languages, themes, currencies and signup dropdown options (translated labels)' })
   get(@I18n() i18n: I18nContext) {
     return {
       appName: i18n.t('common.APP_NAME'),
@@ -26,6 +27,8 @@ export class MetaController {
       themes: THEMES.map((code) => ({ code, label: i18n.t(`common.THEME_${code}`) })),
       defaultTheme: DEFAULT_THEME,
       currencies: ['SYP', 'USD'],
+      accountTypes: ACCOUNT_TYPES.map((code) => ({ code, label: i18n.t(`common.ACCOUNT_TYPE_${code}`) })),
+      providerTypes: PROVIDER_TYPES.map((code) => ({ code, label: i18n.t(`common.PROVIDER_TYPE_${code}`) })),
     };
   }
 }

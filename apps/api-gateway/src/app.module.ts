@@ -87,7 +87,7 @@ import { PreferencesController } from './preferences/preferences.controller.js';
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
     {
       provide: APP_PIPE,
-      useValue: new I18nValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
+      useValue: new I18nValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true, stopAtFirstError: true }),
     },
     // Order matters: authenticate first so the throttler can key by user id.
     { provide: APP_GUARD, useClass: JwtAuthGuard },

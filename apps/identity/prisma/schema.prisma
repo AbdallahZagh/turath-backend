@@ -19,6 +19,15 @@ enum UserRole {
   SUPER_ADMIN
 }
 
+/// Kind of business a provider account runs. Null for tourists.
+enum ProviderType {
+  RESTAURANT
+  HOTEL
+  TRIP_AGENCY
+  EVENT_MANAGER
+  TOUR_GUIDE
+}
+
 enum Locale {
   en
   ar
@@ -31,30 +40,31 @@ enum Theme {
 }
 
 model User {
-  id               String    @id @default(uuid()) @db.Uuid
+  id               String        @id @default(uuid()) @db.Uuid
   /// E.164, e.g. +963944123456
-  phone            String    @unique @db.VarChar(20)
+  phone            String        @unique @db.VarChar(20)
   /// ISO 3166-1 alpha-2 of the phone number
-  phoneCountry     String?   @map("phone_country") @db.Char(2)
+  phoneCountry     String?       @map("phone_country") @db.Char(2)
   /// Stored lower-case
-  email            String?   @unique @db.VarChar(150)
+  email            String?       @unique @db.VarChar(150)
   /// Null for phone-only accounts
-  passwordHash     String?   @map("password_hash")
-  fullName         String    @map("full_name") @db.VarChar(100)
-  dateOfBirth      DateTime? @map("date_of_birth") @db.Date
+  passwordHash     String?       @map("password_hash")
+  fullName         String        @map("full_name") @db.VarChar(100)
+  dateOfBirth      DateTime?     @map("date_of_birth") @db.Date
   /// ISO 3166-1 alpha-2
-  nationality      String?   @db.Char(2)
-  role             UserRole  @default(TOURIST)
+  nationality      String?       @db.Char(2)
+  role             UserRole      @default(TOURIST)
+  providerType     ProviderType? @map("provider_type")
   /// 0–100, starts at 100, −30 per no-show (see SRS FR-AUTH-04)
-  reliabilityScore Int       @default(100) @map("reliability_score")
-  preferredLocale  Locale    @default(en) @map("preferred_locale")
-  preferredTheme   Theme     @default(system) @map("preferred_theme")
-  phoneVerifiedAt  DateTime? @map("phone_verified_at") @db.Timestamptz(6)
-  emailVerifiedAt  DateTime? @map("email_verified_at") @db.Timestamptz(6)
-  lockedAt         DateTime? @map("locked_at") @db.Timestamptz(6)
-  lastLoginAt      DateTime? @map("last_login_at") @db.Timestamptz(6)
-  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  reliabilityScore Int           @default(100) @map("reliability_score")
+  preferredLocale  Locale        @default(en) @map("preferred_locale")
+  preferredTheme   Theme         @default(system) @map("preferred_theme")
+  phoneVerifiedAt  DateTime?     @map("phone_verified_at") @db.Timestamptz(6)
+  emailVerifiedAt  DateTime?     @map("email_verified_at") @db.Timestamptz(6)
+  lockedAt         DateTime?     @map("locked_at") @db.Timestamptz(6)
+  lastLoginAt      DateTime?     @map("last_login_at") @db.Timestamptz(6)
+  createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@index([role])
   @@map("users")

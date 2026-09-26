@@ -6,6 +6,14 @@ export const IDENTITY_CLIENT = Symbol('IDENTITY_CLIENT');
 export const USER_ROLES = ['TOURIST', 'PROVIDER_STAFF', 'PROVIDER_OWNER', 'SUPER_ADMIN'] as const;
 export type UserRole = (typeof USER_ROLES)[number];
 
+/** What someone signs up as. PROVIDER accounts are created with the PROVIDER_OWNER role. */
+export const ACCOUNT_TYPES = ['TOURIST', 'PROVIDER'] as const;
+export type AccountType = (typeof ACCOUNT_TYPES)[number];
+
+/** Kind of business a provider runs (the signup dropdown). */
+export const PROVIDER_TYPES = ['RESTAURANT', 'HOTEL', 'TRIP_AGENCY', 'EVENT_MANAGER', 'TOUR_GUIDE'] as const;
+export type ProviderType = (typeof PROVIDER_TYPES)[number];
+
 export const AUTH_CHANNELS = ['phone', 'email'] as const;
 export type AuthChannel = (typeof AUTH_CHANNELS)[number];
 
@@ -16,7 +24,6 @@ export const IdentityPatterns = {
   LOGIN_EMAIL: 'identity.login.email',
   OTP_SEND: 'identity.otp.send',
   OTP_VERIFY: 'identity.otp.verify',
-  TOKEN_REFRESH: 'identity.token.refresh',
   LOGOUT: 'identity.logout',
   LOGOUT_ALL: 'identity.logout.all',
   SESSIONS_LIST: 'identity.sessions.list',
@@ -47,16 +54,17 @@ export type RegisterPayload = {
   phoneCountry: string;
   email: string;
   password: string;
+  accountType: AccountType;
+  /** Set only when accountType is PROVIDER. */
+  providerType: ProviderType | null;
   locale: Locale;
 };
 
-export type LoginEmailPayload = { email: string; password: string };
+export type LoginEmailPayload = { email: string; password: string; client: ClientInfo };
 
 export type OtpSendPayload = { channel: AuthChannel; destination: string };
 
 export type OtpVerifyPayload = OtpSendPayload & { code: string; client: ClientInfo };
-
-export type RefreshPayload = { refreshToken: string; client: ClientInfo };
 
 export type SessionRef = { userId: string; sessionId: string };
 
@@ -85,6 +93,7 @@ export type UserView = {
   dateOfBirth: string | null;
   nationality: string | null;
   role: UserRole;
+  providerType: ProviderType | null;
   reliabilityScore: number;
   locale: Locale;
   theme: Theme;

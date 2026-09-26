@@ -15,7 +15,6 @@ import type {
   OtpVerifyPayload,
   PasswordForgotPayload,
   PasswordResetPayload,
-  RefreshPayload,
   RegisterPayload,
 } from '@turath/contracts';
 import { REDIS_CLIENT, SessionStore, type RedisClient } from '@turath/redis';
@@ -74,6 +73,8 @@ export class AuthService {
             phoneCountry: input.phoneCountry,
             email: input.email,
             passwordHash,
+            role: input.accountType === 'PROVIDER' ? 'PROVIDER_OWNER' : 'TOURIST',
+            providerType: input.accountType === 'PROVIDER' ? input.providerType : null,
             preferredLocale: input.locale,
           },
         }),
@@ -88,13 +89,20 @@ export class AuthService {
     return this.dispatchOtp('phone', input.phone, input.locale);
   }
 
-  /** Step 1 of email login: check the password, then send a code to the inbox. */
-  async loginWithEmail(input: LoginEmailPayload): Promise<OtpDispatch> {
+  /**
+   * Email + password sign-in, no code. The account must have finished signup
+   * (phone verified), otherwise the phone check at registration could be skipped.
+   */
+  async loginWithEmail(input: LoginEmailPayload): Promise<AuthResult> {
     const user = await this.prisma.user.findUnique({ where: { email: input.email } });
     const valid = user?.passwordHash ? await argon2.verify(user.passwordHash, input.password) : false;
     if (!user || !valid) throw rpcError(ErrorCode.INVALID_CREDENTIALS);
     this.assertActive(user);
-    return this.dispatchOtp('email', input.email, user.preferredLocale);
+    if (!user.phoneVerifiedAt) throw rpcError(ErrorCode.ACCOUNT_NOT_VERIFIED);
+
+    const updated = await this.prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
+    await this.users.evict(user.id);
+    return this.startSession(updated, input.client);
   }
 
   /**
@@ -127,29 +135,6 @@ export class AuthService {
     });
     await this.users.evict(user.id);
     return this.startSession(updated, input.client);
-  }
-
-  async refresh(input: RefreshPayload): Promise<AuthResult> {
-    const result = await this.sessions.rotate(input.refreshToken);
-    if (result.status === 'reused') throw rpcError(ErrorCode.REFRESH_TOKEN_REUSED);
-    // Another tab refreshed a moment ago; its cookie already holds the new token, so just retry.
-    if (result.status === 'race') throw rpcError(ErrorCode.REFRESH_RACE);
-    if (result.status !== 'rotated') throw rpcError(ErrorCode.REFRESH_TOKEN_INVALID);
-
-    const user = await this.prisma.user.findUnique({ where: { id: result.session.userId } });
-    if (!user || user.lockedAt) {
-      await this.sessions.revokeAll(result.session.userId);
-      throw rpcError(user ? ErrorCode.ACCOUNT_LOCKED : ErrorCode.SESSION_EXPIRED);
-    }
-
-    return {
-      accessToken: await this.signAccess({ sub: user.id, role: user.role, sid: result.session.id }),
-      accessTokenExpiresIn: this.accessTtlSeconds,
-      refreshToken: result.refresh.refreshToken,
-      refreshTokenExpiresAt: result.refresh.expiresAt.toISOString(),
-      sessionId: result.session.id,
-      user: toUserView(user),
-    };
   }
 
   /** Always answers the same way; the reset link only goes out when the account exists. */

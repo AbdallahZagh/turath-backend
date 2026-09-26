@@ -9,5 +9,11 @@
   "COUNTRY": "Choose a valid country.",
   "OTP": "Enter the 6-digit code.",
   "ONE_OF": "Must be one of: {constraints.0}.",
-  "UNKNOWN_FIELD": "This field is not allowed."
+  "UNKNOWN_FIELD": "This field is not allowed.",
+  "NAME": "Use letters only. Spaces, hyphens, apostrophes and dots are allowed.",
+  "DATE_OF_BIRTH": "Enter a real date of birth in the past.",
+  "PASSWORD_WEAK": "Use at least one letter and one number.",
+  "ACCOUNT_TYPE": "Choose Tourist or Provider.",
+  "PROVIDER_TYPE": "Choose a provider type: Restaurant, Hotel, Trip agency, Event manager or Tour guide.",
+  "PROVIDER_TYPE_NOT_ALLOWED": "Only providers choose a provider type. Remove this field for tourist accounts."
 }

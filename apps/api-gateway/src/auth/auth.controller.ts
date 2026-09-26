@@ -14,8 +14,9 @@ import {
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
-  ApiCookieAuth,
-  ApiHeader,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -25,7 +26,7 @@ import {
 import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import { I18nContext } from 'nestjs-i18n';
-import { AppException, DEFAULT_LOCALE, ErrorCode, isLocale } from '@turath/common';
+import { DEFAULT_LOCALE, isLocale } from '@turath/common';
 import {
   IdentityPatterns,
   type AuthResult,
@@ -36,14 +37,16 @@ import {
 } from '@turath/contracts';
 import { IdentityClient } from '../infra/identity.client.js';
 import { AuthCookies } from './auth.cookies.js';
+import { LOGIN_EMAIL_DESCRIPTION, LOGIN_PHONE_DESCRIPTION, LOGIN_PHONE_VERIFY_DESCRIPTION, REGISTER_DESCRIPTION } from './auth.docs.js';
 import { type AuthUser, CurrentUser, Public } from './auth.decorators.js';
 import {
   AuthResponseDto,
   ErrorResponseDto,
   ForgotPasswordDto,
   LoginEmailDto,
+  LoginPhoneDto,
+  LoginPhoneVerifyDto,
   OtpDispatchDto,
-  RefreshDto,
   RegisterDto,
   ResetPasswordDto,
   SendOtpDto,
@@ -55,8 +58,6 @@ import {
 /** Code-sending endpoints: 5 per minute per IP (identity also caps 3 per number per 15 min). */
 const OTP_LIMIT = { default: { limit: 5, ttl: 60_000 } };
 const LOGIN_LIMIT = { default: { limit: 10, ttl: 60_000 } };
-
-const MOBILE_HEADER = 'x-client-type';
 
 @ApiTags('auth')
 @ApiBadRequestResponse({ type: ErrorResponseDto, description: 'Validation failed (messages are translated)' })
@@ -71,8 +72,12 @@ export class AuthController {
   @Public()
   @Throttle(OTP_LIMIT)
   @Post('register')
-  @ApiOperation({ summary: 'Tourist signup. Sends a code to the phone; finish with POST /auth/otp/verify.' })
-  @ApiOkResponse({ type: OtpDispatchDto })
+  @ApiOperation({
+    summary: 'Create a tourist or provider account and send a verification code to the phone',
+    description: REGISTER_DESCRIPTION,
+  })
+  @ApiCreatedResponse({ type: OtpDispatchDto, description: 'Account created (unverified); a 6-digit code was sent by SMS.' })
+  @ApiConflictResponse({ type: ErrorResponseDto, description: '`PHONE_TAKEN` or `EMAIL_TAKEN` (a verified account already uses it)' })
   register(@Body() dto: RegisterDto): Promise<OtpDispatch> {
     const lang = I18nContext.current()?.lang;
     return this.identity.send(IdentityPatterns.REGISTER, {
@@ -83,6 +88,8 @@ export class AuthController {
       phoneCountry: dto.phoneCountry,
       email: dto.email,
       password: dto.password,
+      accountType: dto.accountType,
+      providerType: dto.accountType === 'PROVIDER' ? (dto.providerType ?? null) : null,
       locale: isLocale(lang) ? lang : DEFAULT_LOCALE,
     });
   }
@@ -91,11 +98,61 @@ export class AuthController {
   @Throttle(LOGIN_LIMIT)
   @HttpCode(HttpStatus.OK)
   @Post('login/email')
-  @ApiOperation({ summary: 'Email + password. On success a code is emailed; finish with POST /auth/otp/verify.' })
-  @ApiOkResponse({ type: OtpDispatchDto })
-  @ApiUnauthorizedResponse({ type: ErrorResponseDto, description: 'INVALID_CREDENTIALS' })
-  loginEmail(@Body() dto: LoginEmailDto): Promise<OtpDispatch> {
-    return this.identity.send(IdentityPatterns.LOGIN_EMAIL, { email: dto.email, password: dto.password });
+  @ApiOperation({
+    summary: 'Sign in with email and password (no code). Returns the access and refresh tokens.',
+    description: LOGIN_EMAIL_DESCRIPTION,
+  })
+  @ApiOkResponse({ type: AuthResponseDto, description: 'Signed in. Session cookies are set as well.' })
+  @ApiUnauthorizedResponse({ type: ErrorResponseDto, description: '`INVALID_CREDENTIALS`' })
+  @ApiForbiddenResponse({ type: ErrorResponseDto, description: '`ACCOUNT_NOT_VERIFIED` or `ACCOUNT_LOCKED`' })
+  async loginEmail(
+    @Body() dto: LoginEmailDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<AuthResponseDto> {
+    const auth = await this.identity.send<AuthResult>(IdentityPatterns.LOGIN_EMAIL, {
+      email: dto.email,
+      password: dto.password,
+      client: clientInfo(req),
+    });
+    return this.respondWithSession(auth, res);
+  }
+
+  @Public()
+  @Throttle(OTP_LIMIT)
+  @HttpCode(HttpStatus.OK)
+  @Post('login/phone')
+  @ApiOperation({
+    summary: 'Phone login, step 1: send a 6-digit code by SMS (returned as devCode for now)',
+    description: LOGIN_PHONE_DESCRIPTION,
+  })
+  @ApiOkResponse({ type: OtpDispatchDto, description: 'Code sent (or silently skipped if the number is not registered).' })
+  loginPhone(@Body() dto: LoginPhoneDto): Promise<OtpDispatch> {
+    return this.identity.send(IdentityPatterns.OTP_SEND, { channel: 'phone', destination: dto.phone });
+  }
+
+  @Public()
+  @Throttle(LOGIN_LIMIT)
+  @HttpCode(HttpStatus.OK)
+  @Post('login/phone/verify')
+  @ApiOperation({
+    summary: 'Phone login, step 2: exchange the code for the access and refresh tokens',
+    description: LOGIN_PHONE_VERIFY_DESCRIPTION,
+  })
+  @ApiOkResponse({ type: AuthResponseDto, description: 'Signed in. Session cookies are set as well.' })
+  @ApiForbiddenResponse({ type: ErrorResponseDto, description: '`ACCOUNT_LOCKED`' })
+  async loginPhoneVerify(
+    @Body() dto: LoginPhoneVerifyDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<AuthResponseDto> {
+    const auth = await this.identity.send<AuthResult>(IdentityPatterns.OTP_VERIFY, {
+      channel: 'phone',
+      destination: dto.phone,
+      code: dto.code,
+      client: clientInfo(req),
+    });
+    return this.respondWithSession(auth, res);
   }
 
   @Public()
@@ -112,8 +169,9 @@ export class AuthController {
   @Throttle(LOGIN_LIMIT)
   @HttpCode(HttpStatus.OK)
   @Post('otp/verify')
-  @ApiOperation({ summary: 'Exchange a code for a session. Sets the HttpOnly session cookies and the locale/theme cookies.' })
-  @ApiHeader({ name: MOBILE_HEADER, required: false, description: '`mobile` to also receive the refresh token in the body' })
+  @ApiOperation({
+    summary: 'Exchange a code for a session (finishes signup). Returns the tokens and sets the session cookies.',
+  })
   @ApiOkResponse({ type: AuthResponseDto })
   async verifyOtp(
     @Body() dto: VerifyOtpDto,
@@ -126,37 +184,7 @@ export class AuthController {
       code: dto.code,
       client: clientInfo(req),
     });
-    return this.respondWithSession(auth, req, res);
-  }
-
-  @Public()
-  @Throttle({ default: { limit: 30, ttl: 60_000 } })
-  @HttpCode(HttpStatus.OK)
-  @Post('refresh')
-  @ApiOperation({ summary: 'Rotate the refresh token. Reusing an old refresh token signs that session out.' })
-  @ApiCookieAuth('refresh-cookie')
-  @ApiOkResponse({ type: AuthResponseDto })
-  @ApiUnauthorizedResponse({ type: ErrorResponseDto })
-  async refresh(
-    @Body() dto: RefreshDto,
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ): Promise<AuthResponseDto> {
-    const refreshToken = this.cookies.readRefresh(req) ?? dto.refreshToken;
-    if (!refreshToken) throw new AppException(ErrorCode.REFRESH_TOKEN_MISSING);
-
-    try {
-      const auth = await this.identity.send<AuthResult>(IdentityPatterns.TOKEN_REFRESH, {
-        refreshToken,
-        client: clientInfo(req),
-      });
-      return this.respondWithSession(auth, req, res);
-    } catch (error) {
-      if (error instanceof AppException && error.getStatus() === HttpStatus.UNAUTHORIZED) {
-        this.cookies.clearSession(res);
-      }
-      throw error;
-    }
+    return this.respondWithSession(auth, res);
   }
 
   @Public()
@@ -223,15 +251,15 @@ export class AuthController {
     await this.identity.send(IdentityPatterns.SESSIONS_REVOKE, { userId: user.id, sessionId });
   }
 
-  private respondWithSession(auth: AuthResult, req: Request, res: Response): AuthResponseDto {
+  /** Tokens go in the body (mobile, API clients) and in HttpOnly cookies (web). */
+  private respondWithSession(auth: AuthResult, res: Response): AuthResponseDto {
     this.cookies.setSession(res, auth);
-    const isMobile = req.headers[MOBILE_HEADER] === 'mobile';
     return {
       accessToken: auth.accessToken,
       accessTokenExpiresIn: auth.accessTokenExpiresIn,
+      refreshToken: auth.refreshToken,
       refreshTokenExpiresAt: auth.refreshTokenExpiresAt,
       user: auth.user,
-      ...(isMobile && { refreshToken: auth.refreshToken }),
     };
   }
 }

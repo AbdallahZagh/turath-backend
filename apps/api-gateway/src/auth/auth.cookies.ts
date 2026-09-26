@@ -72,9 +72,4 @@ export class AuthCookies {
       theme: isTheme(cookies[THEME_COOKIE]) ? cookies[THEME_COOKIE] : undefined,
     };
   }
-
-  readRefresh(req: Request): string | undefined {
-    const value = (req.cookies as Record<string, unknown> | undefined)?.[REFRESH_COOKIE];
-    return typeof value === 'string' && value ? value : undefined;
-  }
 }

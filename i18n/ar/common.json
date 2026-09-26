@@ -4,5 +4,12 @@
   "LOCALE_ar": "العربية",
   "THEME_light": "فاتح",
   "THEME_dark": "داكن",
-  "THEME_system": "حسب الجهاز"
+  "THEME_system": "حسب الجهاز",
+  "ACCOUNT_TYPE_TOURIST": "سائح",
+  "ACCOUNT_TYPE_PROVIDER": "مزوّد خدمة",
+  "PROVIDER_TYPE_RESTAURANT": "مطعم",
+  "PROVIDER_TYPE_HOTEL": "فندق",
+  "PROVIDER_TYPE_TRIP_AGENCY": "وكالة رحلات",
+  "PROVIDER_TYPE_EVENT_MANAGER": "منظّم فعاليات",
+  "PROVIDER_TYPE_TOUR_GUIDE": "مرشد سياحي"
 }

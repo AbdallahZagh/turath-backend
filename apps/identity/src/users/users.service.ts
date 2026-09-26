@@ -19,6 +19,7 @@ export function toUserView(user: User): UserView {
     dateOfBirth: user.dateOfBirth?.toISOString().slice(0, 10) ?? null,
     nationality: user.nationality,
     role: user.role,
+    providerType: user.providerType,
     reliabilityScore: user.reliabilityScore,
     locale: user.preferredLocale,
     theme: user.preferredTheme,
