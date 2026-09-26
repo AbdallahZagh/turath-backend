@@ -7,3 +7,8 @@ coverage
 !.env.example
 **/generated
 *.log
+# tests never ship in images
+test
+apps/*/test
+libs/*/test
+libs/testing

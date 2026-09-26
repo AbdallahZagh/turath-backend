@@ -20,9 +20,10 @@
     "paths": {
       "@turath/common": ["./libs/common/src/index.ts"],
       "@turath/contracts": ["./libs/contracts/src/index.ts"],
-      "@turath/redis": ["./libs/redis/src/index.ts"]
+      "@turath/redis": ["./libs/redis/src/index.ts"],
+      "@turath/testing": ["./libs/testing/src/index.ts"]
     }
   },
-  "include": ["apps/**/*.ts", "libs/**/*.ts"],
+  "include": ["apps/**/*.ts", "libs/**/*.ts", "test/**/*.ts"],
   "exclude": ["node_modules", "dist", "apps/*/prisma.config.ts"]
 }

@@ -4,5 +4,5 @@
     "outDir": "../../dist/apps/api-gateway"
   },
   "include": ["src/**/*.ts", "../../libs/**/*.ts"],
-  "exclude": ["node_modules", "dist", "**/*.spec.ts"]
+  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/test/**", "../../libs/testing/**"]
 }
