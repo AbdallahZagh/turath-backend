@@ -1,7 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import argon2 from 'argon2';
-import { ErrorCode, rpcError } from '@turath/common';
-import type { AdminCreatePayload, AdminPermission, AdminUpdatePayload, AdminView } from '@turath/contracts';
+import { rpcError } from '@turath/common';
+import {
+  type AdminCreatePayload,
+  type AdminPermission,
+  type AdminUpdatePayload,
+  type AdminView,
+  IdentityError,
+} from '@turath/contracts';
 import { type Admin, Prisma } from '../../generated/prisma/client.js';
 import { PrismaService } from '../../core/prisma/prisma.service.js';
 
@@ -52,7 +58,7 @@ export class AdminsService {
 
   async get(id: string): Promise<AdminView> {
     const admin = await this.prisma.admin.findUnique({ where: { id } });
-    if (!admin) throw rpcError(ErrorCode.ADMIN_NOT_FOUND);
+    if (!admin) throw rpcError(IdentityError.ADMIN_NOT_FOUND);
     return toAdminView(admin);
   }
 
@@ -84,8 +90,8 @@ export class AdminsService {
 
 function mapPrismaError(error: unknown): unknown {
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
-    if (error.code === 'P2002') return rpcError(ErrorCode.ADMIN_EMAIL_TAKEN);
-    if (error.code === 'P2025') return rpcError(ErrorCode.ADMIN_NOT_FOUND);
+    if (error.code === 'P2002') return rpcError(IdentityError.ADMIN_EMAIL_TAKEN);
+    if (error.code === 'P2025') return rpcError(IdentityError.ADMIN_NOT_FOUND);
   }
   return error;
 }

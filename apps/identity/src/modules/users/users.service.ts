@@ -1,8 +1,8 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
 import type { Cache } from 'cache-manager';
-import { ErrorCode, rpcError, type Locale, type Theme } from '@turath/common';
-import type { UserView } from '@turath/contracts';
+import { type Locale, rpcError, type Theme } from '@turath/common';
+import { IdentityError, type UserView } from '@turath/contracts';
 import { PrismaService } from '../../core/prisma/prisma.service.js';
 import { toUserView } from './user.mapper.js';
 
@@ -25,7 +25,7 @@ export class UsersService {
     if (cached) return cached;
 
     const user = await this.prisma.user.findUnique({ where: { id } });
-    if (!user) throw rpcError(ErrorCode.USER_NOT_FOUND);
+    if (!user) throw rpcError(IdentityError.USER_NOT_FOUND);
 
     const view = toUserView(user);
     await this.cache.set(cacheKey(id), view, USER_CACHE_TTL_MS);

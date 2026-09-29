@@ -1,5 +1,4 @@
-import { ErrorCode } from '@turath/common';
-import { IdentityPatterns } from '@turath/contracts';
+import { IdentityError, IdentityPatterns } from '@turath/contracts';
 import { SessionStore } from '@turath/redis';
 import { buildAuthResult, buildOtpDispatch, buildRegisterBody } from '@turath/testing';
 import { cookiesOf, createGateway, type GatewayHarness } from './gateway.harness.js';
@@ -63,7 +62,7 @@ describe('POST /api/v1/auth/register', () => {
   });
 
   it('passes identity conflicts through, translated', async () => {
-    gw.identity.fail(IdentityPatterns.REGISTER, ErrorCode.PHONE_TAKEN);
+    gw.identity.fail(IdentityPatterns.REGISTER, IdentityError.PHONE_TAKEN);
 
     const res = await gw.http().post('/api/v1/auth/register').set('x-lang', 'ar').send(buildRegisterBody());
 
@@ -90,16 +89,16 @@ describe('POST /api/v1/auth/login/email', () => {
   });
 
   it.each([
-    [ErrorCode.INVALID_CREDENTIALS, 401],
-    [ErrorCode.ACCOUNT_NOT_VERIFIED, 403],
-    [ErrorCode.ACCOUNT_LOCKED, 403],
-  ])('maps %s to HTTP %i', async (code, status) => {
-    gw.identity.fail(IdentityPatterns.LOGIN_EMAIL, code);
+    [IdentityError.INVALID_CREDENTIALS, 401],
+    [IdentityError.ACCOUNT_NOT_VERIFIED, 403],
+    [IdentityError.ACCOUNT_LOCKED, 403],
+  ])('maps %o to HTTP %i', async (error, status) => {
+    gw.identity.fail(IdentityPatterns.LOGIN_EMAIL, error);
 
     const res = await gw.http().post('/api/v1/auth/login/email').send({ email: 'a@b.co', password: 'x' });
 
     expect(res.status).toBe(status);
-    expect(res.body.code).toBe(code);
+    expect(res.body.code).toBe(error.code);
   });
 });
 
@@ -135,7 +134,7 @@ describe('phone login', () => {
   });
 
   it('step 2 translates a wrong code', async () => {
-    gw.identity.fail(IdentityPatterns.OTP_VERIFY, ErrorCode.OTP_INVALID);
+    gw.identity.fail(IdentityPatterns.OTP_VERIFY, IdentityError.OTP_INVALID);
 
     const res = await gw
       .http()

@@ -1,5 +1,4 @@
-import { ErrorCode } from '@turath/common';
-import type { RegisterPayload } from '@turath/contracts';
+import { IdentityError, type RegisterPayload } from '@turath/contracts';
 import { createIdentity, expectRpcError, type IdentityHarness } from './identity.harness.js';
 
 let h: IdentityHarness;
@@ -53,8 +52,8 @@ describe('register', () => {
   it('refuses a phone or email already used by a verified account', async () => {
     await registerVerified();
 
-    await expectRpcError(h.auth.register(signup({ email: 'other@example.com' })), ErrorCode.PHONE_TAKEN);
-    await expectRpcError(h.auth.register(signup({ phone: '+963933123456' })), ErrorCode.EMAIL_TAKEN);
+    await expectRpcError(h.auth.register(signup({ email: 'other@example.com' })), IdentityError.PHONE_TAKEN);
+    await expectRpcError(h.auth.register(signup({ phone: '+963933123456' })), IdentityError.EMAIL_TAKEN);
   });
 
   it('replaces an abandoned (unverified) signup', async () => {
@@ -92,7 +91,7 @@ describe('email login (no code)', () => {
 
     await expectRpcError(
       h.auth.loginEmail({ email: 'rami@example.com', password: 'Turath2026', client }),
-      ErrorCode.ACCOUNT_NOT_VERIFIED,
+      IdentityError.ACCOUNT_NOT_VERIFIED,
     );
   });
 
@@ -101,11 +100,11 @@ describe('email login (no code)', () => {
 
     await expectRpcError(
       h.auth.loginEmail({ email: 'rami@example.com', password: 'Wrong2026', client }),
-      ErrorCode.INVALID_CREDENTIALS,
+      IdentityError.INVALID_CREDENTIALS,
     );
     await expectRpcError(
       h.auth.loginEmail({ email: 'nobody@example.com', password: 'Turath2026', client }),
-      ErrorCode.INVALID_CREDENTIALS,
+      IdentityError.INVALID_CREDENTIALS,
     );
   });
 
@@ -115,7 +114,7 @@ describe('email login (no code)', () => {
 
     await expectRpcError(
       h.auth.loginEmail({ email: 'rami@example.com', password: 'Turath2026', client }),
-      ErrorCode.ACCOUNT_LOCKED,
+      IdentityError.ACCOUNT_LOCKED,
     );
   });
 });
@@ -125,8 +124,8 @@ describe('OTP', () => {
     await h.auth.register(signup());
     const attempt = () => h.auth.verifyOtp({ channel: 'phone', destination: '+963944123456', code: '000000', client });
 
-    for (let i = 0; i < 5; i++) await expectRpcError(attempt(), ErrorCode.OTP_INVALID);
-    await expectRpcError(attempt(), ErrorCode.OTP_TOO_MANY_ATTEMPTS);
+    for (let i = 0; i < 5; i++) await expectRpcError(attempt(), IdentityError.OTP_INVALID);
+    await expectRpcError(attempt(), IdentityError.OTP_TOO_MANY_ATTEMPTS);
   });
 
   it('enforces the resend cooldown', async () => {
@@ -134,7 +133,10 @@ describe('OTP', () => {
     await h.redis.del('otp-cooldown:phone:+963944123456'); // the signup code started one
     await h.auth.sendOtp({ channel: 'phone', destination: '+963944123456' });
 
-    await expectRpcError(h.auth.sendOtp({ channel: 'phone', destination: '+963944123456' }), ErrorCode.OTP_COOLDOWN);
+    await expectRpcError(
+      h.auth.sendOtp({ channel: 'phone', destination: '+963944123456' }),
+      IdentityError.OTP_COOLDOWN,
+    );
   });
 
   it('answers the same for unknown numbers, without a code', async () => {
@@ -156,7 +158,7 @@ describe('password reset', () => {
     expect(sessions).toHaveLength(1);
     await expectRpcError(
       h.auth.loginEmail({ email: 'rami@example.com', password: 'Turath2026', client }),
-      ErrorCode.INVALID_CREDENTIALS,
+      IdentityError.INVALID_CREDENTIALS,
     );
     expect((await h.auth.loginEmail({ email: 'rami@example.com', password: 'NewPass2026', client })).user.id).toBe(
       auth.user.id,
@@ -168,7 +170,10 @@ describe('password reset', () => {
     const { devCode: token } = await h.auth.forgotPassword({ channel: 'email', destination: 'rami@example.com' });
     await h.auth.resetPassword({ token: token!, password: 'NewPass2026' });
 
-    await expectRpcError(h.auth.resetPassword({ token: token!, password: 'Other2026' }), ErrorCode.RESET_TOKEN_INVALID);
+    await expectRpcError(
+      h.auth.resetPassword({ token: token!, password: 'Other2026' }),
+      IdentityError.RESET_TOKEN_INVALID,
+    );
   });
 });
 
@@ -198,7 +203,7 @@ describe('profile, preferences and sessions', () => {
 
     await expectRpcError(
       h.sessions.revoke({ userId: auth.user.id, sessionId: '33333333-3333-4333-8333-333333333333' }),
-      ErrorCode.SESSION_NOT_FOUND,
+      IdentityError.SESSION_NOT_FOUND,
     );
   });
 });

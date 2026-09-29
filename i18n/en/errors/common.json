@@ -1,0 +1,11 @@
+{
+  "VALIDATION_FAILED": "Some fields need your attention.",
+  "BAD_REQUEST": "The request could not be processed.",
+  "UNAUTHORIZED": "Please sign in to continue.",
+  "FORBIDDEN": "You don't have access to this.",
+  "NOT_FOUND": "We couldn't find what you were looking for.",
+  "CONFLICT": "This conflicts with existing data. Please try again.",
+  "TOO_MANY_REQUESTS": "Too many requests. Please wait {seconds} seconds and try again.",
+  "INTERNAL_ERROR": "Something went wrong on our side. Please try again.",
+  "SERVICE_UNAVAILABLE": "The service is temporarily unavailable. Please try again shortly."
+}

@@ -1,8 +1,8 @@
 import { type CanActivate, type ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService, TokenExpiredError } from '@nestjs/jwt';
-import { AppException, ErrorCode } from '@turath/common';
-import type { AccessTokenClaims, UserRole } from '@turath/contracts';
+import { AppException, CommonError } from '@turath/common';
+import { type AccessTokenClaims, IdentityError, type UserRole } from '@turath/contracts';
 import { SessionStore } from '@turath/redis';
 import { ACCESS_COOKIE } from './auth-cookies.js';
 import { type AuthedRequest, IS_PUBLIC, ROLES } from './auth.decorators.js';
@@ -34,7 +34,7 @@ export class JwtAuthGuard implements CanActivate {
 
     if (!token) {
       if (isPublic) return true;
-      throw new AppException(ErrorCode.UNAUTHORIZED);
+      throw new AppException(CommonError.UNAUTHORIZED);
     }
 
     let claims: AccessTokenClaims;
@@ -42,12 +42,14 @@ export class JwtAuthGuard implements CanActivate {
       claims = await this.jwt.verifyAsync<AccessTokenClaims>(token);
     } catch (error) {
       if (isPublic) return true;
-      throw new AppException(error instanceof TokenExpiredError ? ErrorCode.SESSION_EXPIRED : ErrorCode.UNAUTHORIZED);
+      throw new AppException(
+        error instanceof TokenExpiredError ? IdentityError.SESSION_EXPIRED : CommonError.UNAUTHORIZED,
+      );
     }
 
     if (!(await this.sessions.exists(claims.sid))) {
       if (isPublic) return true;
-      throw new AppException(ErrorCode.SESSION_EXPIRED);
+      throw new AppException(IdentityError.SESSION_EXPIRED);
     }
 
     req.user = { id: claims.sub, role: claims.role, sessionId: claims.sid };
@@ -67,8 +69,8 @@ export class RolesGuard implements CanActivate {
     if (!roles?.length) return true;
 
     const user = context.switchToHttp().getRequest<AuthedRequest>().user;
-    if (!user) throw new AppException(ErrorCode.UNAUTHORIZED);
-    if (!roles.includes(user.role)) throw new AppException(ErrorCode.FORBIDDEN);
+    if (!user) throw new AppException(CommonError.UNAUTHORIZED);
+    if (!roles.includes(user.role)) throw new AppException(CommonError.FORBIDDEN);
     return true;
   }
 }

@@ -1,49 +1,42 @@
 import { HttpStatus } from '@nestjs/common';
 
 /**
- * Stable, machine-readable error codes. The API never sends raw English to
- * clients: each code is translated from `i18n/<lang>/errors.json`, and the
- * frontend may also switch on `code` directly.
+ * One error a client can receive:
+ *   code       stable, machine-readable; sent to clients, who switch on it
+ *   status     the HTTP status it maps to
+ *   namespace  where its message lives: i18n/<lang>/errors/<namespace>.json
+ *
+ * The API never sends raw English: the message is translated from that file.
  */
-export const ErrorCode = {
-  // Generic
-  VALIDATION_FAILED: 'VALIDATION_FAILED',
-  BAD_REQUEST: 'BAD_REQUEST',
-  UNAUTHORIZED: 'UNAUTHORIZED',
-  FORBIDDEN: 'FORBIDDEN',
-  NOT_FOUND: 'NOT_FOUND',
-  CONFLICT: 'CONFLICT',
-  TOO_MANY_REQUESTS: 'TOO_MANY_REQUESTS',
-  INTERNAL_ERROR: 'INTERNAL_ERROR',
-  SERVICE_UNAVAILABLE: 'SERVICE_UNAVAILABLE',
+export type ErrorDef = {
+  readonly namespace: string;
+  readonly code: string;
+  readonly status: HttpStatus;
+};
 
-  // Identity
-  INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
-  ACCOUNT_LOCKED: 'ACCOUNT_LOCKED',
-  ACCOUNT_NOT_VERIFIED: 'ACCOUNT_NOT_VERIFIED',
-  PHONE_TAKEN: 'PHONE_TAKEN',
-  EMAIL_TAKEN: 'EMAIL_TAKEN',
-  USER_NOT_FOUND: 'USER_NOT_FOUND',
-  OTP_INVALID: 'OTP_INVALID',
-  OTP_EXPIRED: 'OTP_EXPIRED',
-  OTP_TOO_MANY_ATTEMPTS: 'OTP_TOO_MANY_ATTEMPTS',
-  OTP_COOLDOWN: 'OTP_COOLDOWN',
-  RESET_TOKEN_INVALID: 'RESET_TOKEN_INVALID',
-  SESSION_EXPIRED: 'SESSION_EXPIRED',
-  SESSION_NOT_FOUND: 'SESSION_NOT_FOUND',
-  REFRESH_TOKEN_MISSING: 'REFRESH_TOKEN_MISSING',
-  REFRESH_TOKEN_INVALID: 'REFRESH_TOKEN_INVALID',
-  REFRESH_TOKEN_REUSED: 'REFRESH_TOKEN_REUSED',
-  REFRESH_RACE: 'REFRESH_RACE',
+/**
+ * Declares a service's error catalogue. Each service keeps its own, next to
+ * its contracts (e.g. `IdentityError` in libs/contracts/src/identity/errors.ts),
+ * with the messages in `i18n/{en,ar}/errors/<namespace>.json`:
+ *
+ *   export const BookingError = defineErrors('booking', {
+ *     SLOT_TAKEN: HttpStatus.CONFLICT,
+ *   });
+ *   throw rpcError(BookingError.SLOT_TAKEN);
+ *
+ * Codes must be unique across all catalogues (a unit test checks this).
+ */
+export function defineErrors<const T extends Record<string, HttpStatus>>(
+  namespace: string,
+  statuses: T,
+): { readonly [K in keyof T & string]: ErrorDef & { readonly code: K } } {
+  return Object.fromEntries(
+    Object.entries(statuses).map(([code, status]) => [code, Object.freeze({ namespace, code, status })]),
+  ) as { readonly [K in keyof T & string]: ErrorDef & { readonly code: K } };
+}
 
-  // Admin
-  ADMIN_NOT_FOUND: 'ADMIN_NOT_FOUND',
-  ADMIN_EMAIL_TAKEN: 'ADMIN_EMAIL_TAKEN',
-} as const;
-
-export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
-
-export const ERROR_STATUS: Record<ErrorCode, HttpStatus> = {
+/** Errors any service or the gateway itself can raise. */
+export const CommonError = defineErrors('common', {
   VALIDATION_FAILED: HttpStatus.BAD_REQUEST,
   BAD_REQUEST: HttpStatus.BAD_REQUEST,
   UNAUTHORIZED: HttpStatus.UNAUTHORIZED,
@@ -53,43 +46,24 @@ export const ERROR_STATUS: Record<ErrorCode, HttpStatus> = {
   TOO_MANY_REQUESTS: HttpStatus.TOO_MANY_REQUESTS,
   INTERNAL_ERROR: HttpStatus.INTERNAL_SERVER_ERROR,
   SERVICE_UNAVAILABLE: HttpStatus.SERVICE_UNAVAILABLE,
+});
 
-  INVALID_CREDENTIALS: HttpStatus.UNAUTHORIZED,
-  ACCOUNT_LOCKED: HttpStatus.FORBIDDEN,
-  ACCOUNT_NOT_VERIFIED: HttpStatus.FORBIDDEN,
-  PHONE_TAKEN: HttpStatus.CONFLICT,
-  EMAIL_TAKEN: HttpStatus.CONFLICT,
-  USER_NOT_FOUND: HttpStatus.NOT_FOUND,
-  OTP_INVALID: HttpStatus.BAD_REQUEST,
-  OTP_EXPIRED: HttpStatus.BAD_REQUEST,
-  OTP_TOO_MANY_ATTEMPTS: HttpStatus.TOO_MANY_REQUESTS,
-  OTP_COOLDOWN: HttpStatus.TOO_MANY_REQUESTS,
-  RESET_TOKEN_INVALID: HttpStatus.BAD_REQUEST,
-  SESSION_EXPIRED: HttpStatus.UNAUTHORIZED,
-  SESSION_NOT_FOUND: HttpStatus.NOT_FOUND,
-  REFRESH_TOKEN_MISSING: HttpStatus.UNAUTHORIZED,
-  REFRESH_TOKEN_INVALID: HttpStatus.UNAUTHORIZED,
-  REFRESH_TOKEN_REUSED: HttpStatus.UNAUTHORIZED,
-  REFRESH_RACE: HttpStatus.CONFLICT,
-
-  ADMIN_NOT_FOUND: HttpStatus.NOT_FOUND,
-  ADMIN_EMAIL_TAKEN: HttpStatus.CONFLICT,
+const STATUS_FALLBACK: Partial<Record<number, ErrorDef>> = {
+  400: CommonError.BAD_REQUEST,
+  401: CommonError.UNAUTHORIZED,
+  403: CommonError.FORBIDDEN,
+  404: CommonError.NOT_FOUND,
+  409: CommonError.CONFLICT,
+  429: CommonError.TOO_MANY_REQUESTS,
+  503: CommonError.SERVICE_UNAVAILABLE,
 };
 
-export function isErrorCode(value: unknown): value is ErrorCode {
-  return typeof value === 'string' && value in ERROR_STATUS;
+/** For framework errors that carry only a status (e.g. an unknown route). */
+export function errorForStatus(status: number): ErrorDef {
+  return STATUS_FALLBACK[status] ?? (status >= 500 ? CommonError.INTERNAL_ERROR : CommonError.BAD_REQUEST);
 }
 
-const STATUS_FALLBACK: Partial<Record<number, ErrorCode>> = {
-  400: ErrorCode.BAD_REQUEST,
-  401: ErrorCode.UNAUTHORIZED,
-  403: ErrorCode.FORBIDDEN,
-  404: ErrorCode.NOT_FOUND,
-  409: ErrorCode.CONFLICT,
-  429: ErrorCode.TOO_MANY_REQUESTS,
-  503: ErrorCode.SERVICE_UNAVAILABLE,
-};
-
-export function errorCodeForStatus(status: number): ErrorCode {
-  return STATUS_FALLBACK[status] ?? (status >= 500 ? ErrorCode.INTERNAL_ERROR : ErrorCode.BAD_REQUEST);
+/** The i18n key of an error's message. */
+export function errorMessageKey(error: Pick<ErrorDef, 'namespace' | 'code'>): string {
+  return `errors.${error.namespace}.${error.code}`;
 }

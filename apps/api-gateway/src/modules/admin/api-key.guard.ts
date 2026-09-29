@@ -2,7 +2,7 @@ import { createHash, timingSafeEqual } from 'node:crypto';
 import { type CanActivate, type ExecutionContext, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { Request } from 'express';
-import { AppException, ErrorCode, parseApiKeys } from '@turath/common';
+import { AppException, CommonError, parseApiKeys } from '@turath/common';
 
 export const API_KEY_HEADER = 'x-api-key';
 
@@ -34,6 +34,6 @@ export class ApiKeyGuard implements CanActivate {
       if (matched) return true;
       this.logger.warn(`rejected admin API key from ${req.ip ?? 'unknown'} on ${req.method} ${req.originalUrl}`);
     }
-    throw new AppException(ErrorCode.NOT_FOUND);
+    throw new AppException(CommonError.NOT_FOUND);
   }
 }

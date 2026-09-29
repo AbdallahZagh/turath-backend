@@ -1,11 +1,5 @@
 import { join } from 'node:path';
-import {
-  AcceptLanguageResolver,
-  CookieResolver,
-  HeaderResolver,
-  QueryResolver,
-  type I18nOptions,
-} from 'nestjs-i18n';
+import { AcceptLanguageResolver, CookieResolver, HeaderResolver, QueryResolver, type I18nOptions } from 'nestjs-i18n';
 import { DEFAULT_LOCALE, LOCALE_COOKIE } from '../preferences.js';
 
 /**
@@ -23,6 +17,8 @@ export function i18nOptions(): I18nOptions {
     loaderOptions: {
       path: process.env.I18N_PATH ?? join(process.cwd(), 'i18n'),
       watch: process.env.NODE_ENV === 'development',
+      // i18n/<lang>/errors/<service>.json → errors.<service>.<CODE>
+      includeSubfolders: true,
     },
     resolvers: [
       new QueryResolver(['lang']),

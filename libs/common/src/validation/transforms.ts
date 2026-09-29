@@ -15,5 +15,7 @@ export const toPhoneFor =
   ({ value, obj }: TransformArgs) => {
     if (typeof value !== 'string') return value;
     const country = obj[countryField];
-    return normalizePhone(value, typeof country === 'string' ? country.trim().toUpperCase() : undefined) ?? value.trim();
+    return (
+      normalizePhone(value, typeof country === 'string' ? country.trim().toUpperCase() : undefined) ?? value.trim()
+    );
   };

@@ -16,15 +16,6 @@ export const ADMIN_PERMISSIONS = [
 ] as const;
 export type AdminPermission = (typeof ADMIN_PERMISSIONS)[number];
 
-/** RabbitMQ patterns for back-office accounts (handled by identity). */
-export const AdminPatterns = {
-  CREATE: 'identity.admin.create',
-  LIST: 'identity.admin.list',
-  GET: 'identity.admin.get',
-  UPDATE: 'identity.admin.update',
-  DELETE: 'identity.admin.delete',
-} as const;
-
 export type AdminCreatePayload = {
   fullName: string;
   email: string;

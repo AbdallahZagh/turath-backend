@@ -1,13 +1,4 @@
 {
-  "VALIDATION_FAILED": "Some fields need your attention.",
-  "BAD_REQUEST": "The request could not be processed.",
-  "UNAUTHORIZED": "Please sign in to continue.",
-  "FORBIDDEN": "You don't have access to this.",
-  "NOT_FOUND": "We couldn't find what you were looking for.",
-  "CONFLICT": "This conflicts with existing data. Please try again.",
-  "TOO_MANY_REQUESTS": "Too many requests. Please wait {seconds} seconds and try again.",
-  "INTERNAL_ERROR": "Something went wrong on our side. Please try again.",
-  "SERVICE_UNAVAILABLE": "The service is temporarily unavailable. Please try again shortly.",
   "INVALID_CREDENTIALS": "The email or password is incorrect.",
   "ACCOUNT_LOCKED": "This account is locked. Please contact support.",
   "ACCOUNT_NOT_VERIFIED": "Please verify your phone number to finish signing up.",
@@ -21,10 +12,6 @@
   "RESET_TOKEN_INVALID": "This reset link is invalid or has expired.",
   "SESSION_EXPIRED": "Your session has expired. Please sign in again.",
   "SESSION_NOT_FOUND": "That device is no longer signed in.",
-  "REFRESH_TOKEN_MISSING": "Please sign in to continue.",
-  "REFRESH_TOKEN_INVALID": "Your session has expired. Please sign in again.",
-  "REFRESH_TOKEN_REUSED": "For your security, this session was signed out. Please sign in again.",
-  "REFRESH_RACE": "Your session was just refreshed in another tab. Please try again.",
   "ADMIN_NOT_FOUND": "Admin account not found.",
   "ADMIN_EMAIL_TAKEN": "An admin with this email already exists."
 }

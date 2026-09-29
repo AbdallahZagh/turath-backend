@@ -1,6 +1,6 @@
 import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { isRpcErrorPayload, type ErrorCode } from '@turath/common';
+import { type ErrorDef, isRpcErrorPayload } from '@turath/common';
 import { REDIS_CLIENT, type RedisClient } from '@turath/redis';
 import { PrismaService } from '../../src/core/prisma/prisma.service.js';
 import { IdentityModule } from '../../src/identity.module.js';
@@ -51,13 +51,14 @@ export async function createIdentity(): Promise<IdentityHarness> {
   };
 }
 
-/** Asserts that a handler rejected with the given domain error code. */
-export async function expectRpcError(promise: Promise<unknown>, code: ErrorCode): Promise<void> {
+/** Asserts that a handler rejected with the given domain error (same namespace and code). */
+export async function expectRpcError(promise: Promise<unknown>, expected: ErrorDef): Promise<void> {
   try {
     await promise;
-    expect.unreachable(`expected ${code}`);
+    expect.unreachable(`expected ${expected.namespace}.${expected.code}`);
   } catch (error) {
     const payload = (error as { getError?: () => unknown }).getError?.() ?? error;
-    expect(isRpcErrorPayload(payload) ? payload.code : error).toBe(code);
+    const actual = isRpcErrorPayload(payload) ? { namespace: payload.namespace, code: payload.code } : error;
+    expect(actual).toEqual({ namespace: expected.namespace, code: expected.code });
   }
 }

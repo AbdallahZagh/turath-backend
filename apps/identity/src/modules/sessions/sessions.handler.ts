@@ -1,7 +1,7 @@
 import { Controller, UseFilters } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { ErrorCode, RpcAllExceptionsFilter, rpcError } from '@turath/common';
-import { IdentityPatterns, type SessionRef, type SessionView } from '@turath/contracts';
+import { RpcAllExceptionsFilter, rpcError } from '@turath/common';
+import { IdentityError, IdentityPatterns, type SessionRef, type SessionView } from '@turath/contracts';
 import { SessionStore } from '@turath/redis';
 
 /** RabbitMQ handlers for signing out and listing signed-in devices (sessions live in Redis). */
@@ -28,7 +28,7 @@ export class SessionsHandler {
 
   @MessagePattern(IdentityPatterns.SESSIONS_REVOKE)
   async revoke(@Payload() { userId, sessionId }: SessionRef): Promise<{ revoked: true }> {
-    if (!(await this.sessions.revoke(userId, sessionId))) throw rpcError(ErrorCode.SESSION_NOT_FOUND);
+    if (!(await this.sessions.revoke(userId, sessionId))) throw rpcError(IdentityError.SESSION_NOT_FOUND);
     return { revoked: true };
   }
 }

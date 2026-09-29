@@ -1,4 +1,4 @@
-import { type ErrorCode, rpcError } from '@turath/common';
+import { type ErrorDef, rpcError } from '@turath/common';
 import { Observable, throwError } from 'rxjs';
 
 type Handler = (payload: any) => unknown;
@@ -8,7 +8,7 @@ type Handler = (payload: any) => unknown;
  * message pattern, then assert on what the gateway sent:
  *
  *   identity.reply(IdentityPatterns.REGISTER, () => otpDispatch());
- *   identity.fail(IdentityPatterns.LOGIN_EMAIL, ErrorCode.INVALID_CREDENTIALS);
+ *   identity.fail(IdentityPatterns.LOGIN_EMAIL, IdentityError.INVALID_CREDENTIALS);
  *   expect(identity.lastPayload(IdentityPatterns.REGISTER)).toMatchObject({ ... });
  *
  * An unscripted pattern fails loudly, like a service that doesn't answer.
@@ -23,7 +23,7 @@ export class FakeClientProxy {
   }
 
   /** Reply with a domain error, exactly as a service's `rpcError(code)` would. */
-  fail(pattern: string, code: ErrorCode, args?: Record<string, string | number>): this {
+  fail(pattern: string, code: ErrorDef, args?: Record<string, string | number>): this {
     return this.reply(pattern, () => {
       throw rpcError(code, args).getError();
     });

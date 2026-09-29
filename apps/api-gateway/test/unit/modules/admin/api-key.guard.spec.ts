@@ -1,6 +1,6 @@
 import type { ExecutionContext } from '@nestjs/common';
 import type { ConfigService } from '@nestjs/config';
-import { AppException, ErrorCode } from '@turath/common';
+import { AppException, CommonError } from '@turath/common';
 import { ApiKeyGuard } from '../../../../src/modules/admin/api-key.guard.js';
 
 const KEY_A = 'a'.repeat(40);
@@ -22,7 +22,7 @@ const expectHidden = (run: () => unknown) => {
     expect.unreachable('guard should have thrown');
   } catch (error) {
     expect(error).toBeInstanceOf(AppException);
-    expect((error as AppException).code).toBe(ErrorCode.NOT_FOUND);
+    expect((error as AppException).code).toBe(CommonError.NOT_FOUND.code);
   }
 };
 

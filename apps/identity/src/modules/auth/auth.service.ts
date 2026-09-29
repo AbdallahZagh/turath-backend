@@ -3,19 +3,20 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import argon2 from 'argon2';
-import { ErrorCode, maskDestination, rpcError } from '@turath/common';
-import type {
-  AccessTokenClaims,
-  AuthChannel,
-  AuthResult,
-  ClientInfo,
-  LoginEmailPayload,
-  OtpDispatch,
-  OtpSendPayload,
-  OtpVerifyPayload,
-  PasswordForgotPayload,
-  PasswordResetPayload,
-  RegisterPayload,
+import { CommonError, maskDestination, rpcError } from '@turath/common';
+import {
+  type AccessTokenClaims,
+  type AuthChannel,
+  type AuthResult,
+  type ClientInfo,
+  IdentityError,
+  type LoginEmailPayload,
+  type OtpDispatch,
+  type OtpSendPayload,
+  type OtpVerifyPayload,
+  type PasswordForgotPayload,
+  type PasswordResetPayload,
+  type RegisterPayload,
 } from '@turath/contracts';
 import { REDIS_CLIENT, SessionStore, type RedisClient } from '@turath/redis';
 import { Prisma, type User } from '../../generated/prisma/client.js';
@@ -58,7 +59,7 @@ export class AuthService {
     });
     const verified = existing.find((user) => user.phoneVerifiedAt || user.emailVerifiedAt);
     if (verified) {
-      throw rpcError(verified.phone === input.phone ? ErrorCode.PHONE_TAKEN : ErrorCode.EMAIL_TAKEN);
+      throw rpcError(verified.phone === input.phone ? IdentityError.PHONE_TAKEN : IdentityError.EMAIL_TAKEN);
     }
 
     const passwordHash = await argon2.hash(input.password, { type: argon2.argon2id });
@@ -82,7 +83,7 @@ export class AuthService {
       ]);
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-        throw rpcError(ErrorCode.CONFLICT);
+        throw rpcError(CommonError.CONFLICT);
       }
       throw error;
     }
@@ -97,9 +98,9 @@ export class AuthService {
   async loginWithEmail(input: LoginEmailPayload): Promise<AuthResult> {
     const user = await this.prisma.user.findUnique({ where: { email: input.email } });
     const valid = user?.passwordHash ? await argon2.verify(user.passwordHash, input.password) : false;
-    if (!user || !valid) throw rpcError(ErrorCode.INVALID_CREDENTIALS);
+    if (!user || !valid) throw rpcError(IdentityError.INVALID_CREDENTIALS);
     this.assertActive(user);
-    if (!user.phoneVerifiedAt) throw rpcError(ErrorCode.ACCOUNT_NOT_VERIFIED);
+    if (!user.phoneVerifiedAt) throw rpcError(IdentityError.ACCOUNT_NOT_VERIFIED);
 
     const updated = await this.prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
     await this.users.evict(user.id);
@@ -122,7 +123,7 @@ export class AuthService {
     await this.otp.verify(input.channel, input.destination, input.code);
 
     const user = await this.findByDestination(input.channel, input.destination);
-    if (!user) throw rpcError(ErrorCode.OTP_INVALID);
+    if (!user) throw rpcError(IdentityError.OTP_INVALID);
     this.assertActive(user);
 
     const now = new Date();
@@ -147,7 +148,7 @@ export class AuthService {
     const cooldownKey = `pwd-reset-cooldown:${user.id}`;
     const fresh = await this.redis.set(cooldownKey, '1', { NX: true, EX: this.otp.cooldownSeconds });
     if (fresh === null) {
-      throw rpcError(ErrorCode.OTP_COOLDOWN, { seconds: Math.max(await this.redis.ttl(cooldownKey), 1) });
+      throw rpcError(IdentityError.OTP_COOLDOWN, { seconds: Math.max(await this.redis.ttl(cooldownKey), 1) });
     }
 
     const token = randomBytes(32).toString('base64url');
@@ -165,7 +166,7 @@ export class AuthService {
   /** Single-use token. Existing sessions stay signed in. */
   async resetPassword(input: PasswordResetPayload): Promise<void> {
     const userId = await this.redis.getDel(resetKey(input.token));
-    if (!userId) throw rpcError(ErrorCode.RESET_TOKEN_INVALID);
+    if (!userId) throw rpcError(IdentityError.RESET_TOKEN_INVALID);
 
     await this.prisma.user.update({
       where: { id: userId },
@@ -216,6 +217,6 @@ export class AuthService {
   }
 
   private assertActive(user: User): void {
-    if (user.lockedAt) throw rpcError(ErrorCode.ACCOUNT_LOCKED);
+    if (user.lockedAt) throw rpcError(IdentityError.ACCOUNT_LOCKED);
   }
 }

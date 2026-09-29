@@ -3,8 +3,12 @@ import Joi from 'joi';
 /** Variables every service needs. Apps extend this with their own keys. */
 export const baseEnvSchema = Joi.object({
   NODE_ENV: Joi.string().valid('development', 'production', 'test').default('development'),
-  REDIS_URL: Joi.string().uri({ scheme: ['redis', 'rediss'] }).required(),
-  RABBITMQ_URL: Joi.string().uri({ scheme: ['amqp', 'amqps'] }).required(),
+  REDIS_URL: Joi.string()
+    .uri({ scheme: ['redis', 'rediss'] })
+    .required(),
+  RABBITMQ_URL: Joi.string()
+    .uri({ scheme: ['amqp', 'amqps'] })
+    .required(),
   JWT_ACCESS_SECRET: Joi.string().min(32).required(),
   JWT_ACCESS_TTL_SECONDS: Joi.number().integer().positive().default(900),
   REFRESH_TTL_DAYS: Joi.number().integer().positive().default(30),
@@ -33,11 +37,18 @@ export const gatewayEnvSchema = baseEnvSchema.keys({
 });
 
 export function parseApiKeys(value: unknown): string[] {
-  return typeof value === 'string' ? value.split(',').map((key) => key.trim()).filter(Boolean) : [];
+  return typeof value === 'string'
+    ? value
+        .split(',')
+        .map((key) => key.trim())
+        .filter(Boolean)
+    : [];
 }
 
 export const identityEnvSchema = baseEnvSchema.keys({
-  IDENTITY_DATABASE_URL: Joi.string().uri({ scheme: ['postgres', 'postgresql'] }).required(),
+  IDENTITY_DATABASE_URL: Joi.string()
+    .uri({ scheme: ['postgres', 'postgresql'] })
+    .required(),
   IDENTITY_HEALTH_PORT: Joi.number().port().default(4001),
   OTP_TTL_SECONDS: Joi.number().integer().positive().default(300),
   OTP_MAX_ATTEMPTS: Joi.number().integer().positive().default(5),

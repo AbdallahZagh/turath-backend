@@ -65,7 +65,11 @@ export class SessionStore {
     this.ttlMs = Number(config.get('REFRESH_TTL_DAYS') ?? 30) * 24 * 60 * 60 * 1000;
   }
 
-  async create(userId: string, role: UserRole, client: ClientInfo): Promise<{ sessionId: string; refresh: IssuedRefresh }> {
+  async create(
+    userId: string,
+    role: UserRole,
+    client: ClientInfo,
+  ): Promise<{ sessionId: string; refresh: IssuedRefresh }> {
     const sessionId = randomUUID();
     const secret = randomBytes(32).toString('base64url');
     const now = Date.now();
@@ -170,11 +174,7 @@ export class SessionStore {
   async revokeAll(userId: string, exceptSessionId?: string): Promise<number> {
     const ids = (await this.redis.sMembers(userSessionsKey(userId))).filter((id) => id !== exceptSessionId);
     if (!ids.length) return 0;
-    await this.redis
-      .multi()
-      .del(ids.map(sessionKey))
-      .sRem(userSessionsKey(userId), ids)
-      .exec();
+    await this.redis.multi().del(ids.map(sessionKey)).sRem(userSessionsKey(userId), ids).exec();
     return ids.length;
   }
 

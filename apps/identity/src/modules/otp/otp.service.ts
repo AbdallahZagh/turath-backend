@@ -1,8 +1,8 @@
 import { createHash, randomInt, timingSafeEqual } from 'node:crypto';
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ErrorCode, rpcError } from '@turath/common';
-import type { AuthChannel } from '@turath/contracts';
+import { rpcError } from '@turath/common';
+import { type AuthChannel, IdentityError } from '@turath/contracts';
 import { REDIS_CLIENT, type RedisClient } from '@turath/redis';
 
 /** SRS: at most 3 codes per destination per 15 minutes. */
@@ -39,13 +39,13 @@ export class OtpService {
     const id = `${channel}:${destination}`;
 
     const cooldown = await this.redis.ttl(`otp-cooldown:${id}`);
-    if (cooldown > 0) throw rpcError(ErrorCode.OTP_COOLDOWN, { seconds: cooldown });
+    if (cooldown > 0) throw rpcError(IdentityError.OTP_COOLDOWN, { seconds: cooldown });
 
     const sent = await this.redis.incr(`otp-window:${id}`);
     if (sent === 1) await this.redis.expire(`otp-window:${id}`, WINDOW_SECONDS);
     if (sent > WINDOW_LIMIT) {
       const seconds = await this.redis.ttl(`otp-window:${id}`);
-      throw rpcError(ErrorCode.OTP_COOLDOWN, { seconds: Math.max(seconds, 1) });
+      throw rpcError(IdentityError.OTP_COOLDOWN, { seconds: Math.max(seconds, 1) });
     }
 
     const code = String(randomInt(0, 1_000_000)).padStart(6, '0');
@@ -62,17 +62,17 @@ export class OtpService {
   async verify(channel: AuthChannel, destination: string, code: string): Promise<void> {
     const key = `otp:${channel}:${destination}`;
     const stored = await this.redis.hGetAll(key);
-    if (!stored.codeHash) throw rpcError(ErrorCode.OTP_EXPIRED);
+    if (!stored.codeHash) throw rpcError(IdentityError.OTP_EXPIRED);
 
     if (Number(stored.attempts) >= this.maxAttempts) {
       await this.redis.del(key);
-      throw rpcError(ErrorCode.OTP_TOO_MANY_ATTEMPTS);
+      throw rpcError(IdentityError.OTP_TOO_MANY_ATTEMPTS);
     }
 
     const matches = timingSafeEqual(Buffer.from(stored.codeHash, 'hex'), hash(code));
     if (!matches) {
       await this.redis.hIncrBy(key, 'attempts', 1);
-      throw rpcError(ErrorCode.OTP_INVALID);
+      throw rpcError(IdentityError.OTP_INVALID);
     }
     await this.redis.del([key, `otp-window:${channel}:${destination}`]);
   }

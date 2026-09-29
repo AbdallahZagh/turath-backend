@@ -2,7 +2,7 @@ import { type ArgumentsHost, Catch, Logger, type RpcExceptionFilter } from '@nes
 import { type ClientProxy, RpcException } from '@nestjs/microservices';
 import { firstValueFrom, type Observable, throwError, timeout, TimeoutError } from 'rxjs';
 import { AppException, isRpcErrorPayload, rpcError } from '../errors/app.exception.js';
-import { ErrorCode } from '../errors/error-codes.js';
+import { CommonError } from '../errors/error-codes.js';
 
 /**
  * Gateway → service request/reply. Domain errors come back as AppException
@@ -18,10 +18,10 @@ export async function sendRpc<TResult, TPayload = unknown>(
   try {
     return await firstValueFrom(client.send<TResult, TPayload>(pattern, payload).pipe(timeout(timeoutMs)));
   } catch (error) {
-    if (isRpcErrorPayload(error)) throw new AppException(error.code, error.args, error.status);
-    if (error instanceof TimeoutError) throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+    if (isRpcErrorPayload(error)) throw new AppException(error, error.args);
+    if (error instanceof TimeoutError) throw new AppException(CommonError.SERVICE_UNAVAILABLE);
     new Logger('RPC').error(`${pattern} failed: ${error instanceof Error ? error.message : JSON.stringify(error)}`);
-    throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+    throw new AppException(CommonError.SERVICE_UNAVAILABLE);
   }
 }
 
@@ -36,6 +36,6 @@ export class RpcAllExceptionsFilter implements RpcExceptionFilter {
   catch(exception: unknown, _host: ArgumentsHost): Observable<never> {
     if (exception instanceof RpcException) return throwError(() => exception.getError());
     this.logger.error(exception instanceof Error ? exception.stack : String(exception));
-    return throwError(() => rpcError(ErrorCode.INTERNAL_ERROR).getError());
+    return throwError(() => rpcError(CommonError.INTERNAL_ERROR).getError());
   }
 }
