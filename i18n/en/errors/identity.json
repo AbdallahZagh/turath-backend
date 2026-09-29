@@ -13,5 +13,6 @@
   "SESSION_EXPIRED": "Your session has expired. Please sign in again.",
   "SESSION_NOT_FOUND": "That device is no longer signed in.",
   "ADMIN_NOT_FOUND": "Admin account not found.",
-  "ADMIN_EMAIL_TAKEN": "An admin with this email already exists."
+  "ADMIN_EMAIL_TAKEN": "An admin with this email already exists.",
+  "REVIEW_NOT_FOUND": "Review not found."
 }

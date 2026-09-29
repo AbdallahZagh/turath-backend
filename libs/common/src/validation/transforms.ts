@@ -19,3 +19,7 @@ export const toPhoneFor =
       normalizePhone(value, typeof country === 'string' ? country.trim().toUpperCase() : undefined) ?? value.trim()
     );
   };
+
+/** "12" → 12 (for query strings). Anything that isn't a whole number is left as is, so the integer check reports it. */
+export const toInt = ({ value }: TransformArgs) =>
+  typeof value === 'string' && /^-?\d+$/.test(value.trim()) ? Number(value) : value;

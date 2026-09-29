@@ -114,6 +114,7 @@ Tests set their own environment (`libs/testing/src/test-env.ts`) and use Redis d
 npm run db:generate                          # after schema changes
 npm run db:migrate:dev -- --name <change>    # create + apply a migration
 npm run db:migrate:deploy                    # apply in CI / prod
+npm run db:studio                            # browse the data; prints the local URL
 ```
 
 Schema: `apps/identity/prisma/schema.prisma`. Each future service gets its own schema, config and database (add it to `docker/postgres/init.sql`).

@@ -26,6 +26,7 @@
     "test:cov": "vitest run --project unit --coverage",
     "prisma:identity": "prisma --config apps/identity/prisma.config.ts",
     "db:generate": "npm run prisma:identity -- generate",
+    "db:studio": "npm run prisma:identity -- studio",
     "db:migrate:dev": "npm run prisma:identity -- migrate dev",
     "db:migrate:deploy": "npm run prisma:identity -- migrate deploy",
     "postinstall": "npm run db:generate",

@@ -3,18 +3,21 @@ import { Transform } from 'class-transformer';
 import {
   IsEmail,
   IsIn,
+  IsInt,
   IsISO31661Alpha2,
   IsISO8601,
   IsNotEmpty,
   IsOptional,
   IsString,
   Matches,
+  Max,
   MaxLength,
+  Min,
   MinLength,
   registerDecorator,
 } from 'class-validator';
 import { i18nValidationMessage as msg } from 'nestjs-i18n';
-import { toEmail, toPhoneFor, toUpper, trim } from './transforms.js';
+import { toEmail, toInt, toPhoneFor, toUpper, trim } from './transforms.js';
 
 /**
  * Reusable field rules. Each one bundles the normalising transform and every
@@ -131,4 +134,15 @@ export function IsBirthDate() {
  */
 export function IsOneOf(values: readonly unknown[], messageKey: string, { optional = false } = {}) {
   return applyDecorators(optional ? IsOptional() : Required(), IsIn(values, { message: msg(messageKey) }));
+}
+
+/** A whole number from `min` to `max` (query strings such as `?page=2` are converted). */
+export function IsIntInRange({ min, max, optional = false }: { min: number; max: number; optional?: boolean }) {
+  return applyDecorators(
+    Transform(toInt),
+    optional ? IsOptional() : Required(),
+    IsInt({ message: msg('validation.INTEGER') }),
+    Min(min, { message: msg('validation.MIN_VALUE') }),
+    Max(max, { message: msg('validation.MAX_VALUE') }),
+  );
 }

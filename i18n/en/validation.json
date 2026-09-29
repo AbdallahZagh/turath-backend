@@ -25,5 +25,10 @@
   "NO_DUPLICATES": "Remove the repeated values.",
   "BOOLEAN": "Must be true or false.",
   "ADMIN_ROLE": "Choose a role: Super admin, Admin, Moderator or Support.",
-  "ADMIN_PERMISSION": "Contains an unknown permission. See GET /admin/options for the allowed values."
+  "ADMIN_PERMISSION": "Contains an unknown permission. See GET /admin/options for the allowed values.",
+  "REVIEW_ABOUT": "Choose provider or guest.",
+  "REVIEW_STATUS": "Choose published, flagged or hidden.",
+  "INTEGER": "Enter a whole number.",
+  "MIN_VALUE": "Must be at least {constraints.0}.",
+  "MAX_VALUE": "Must be at most {constraints.0}."
 }

@@ -96,3 +96,43 @@ model Admin {
   @@index([role])
   @@map("admins")
 }
+
+enum ReviewAbout {
+  PROVIDER
+  GUEST
+}
+
+enum ReviewStatus {
+  PUBLISHED
+  FLAGGED
+  HIDDEN
+}
+
+/// A rating left after a booking, moderated from the admin dashboard.
+/// Names are copied onto the row so a review still reads correctly if the
+/// account changes; `subjectId` / `authorId` link to `users` by id only.
+model Review {
+  id            String       @id @default(uuid()) @db.Uuid
+  about         ReviewAbout
+  /// The provider or guest being rated. Null until providers exist as accounts.
+  subjectId     String?      @map("subject_id") @db.Uuid
+  /// English name of the provider or guest being rated
+  subjectName   String       @map("subject_name") @db.VarChar(150)
+  authorId      String?      @map("author_id") @db.Uuid
+  authorNameEn  String       @map("author_name_en") @db.VarChar(100)
+  authorNameAr  String       @map("author_name_ar") @db.VarChar(100)
+  /// 1–5
+  stars         Int
+  bodyEn        String       @map("body_en") @db.VarChar(2000)
+  bodyAr        String       @map("body_ar") @db.VarChar(2000)
+  /// The booking this review is about (owned by the booking service)
+  bookingCode   String       @map("booking_code") @db.VarChar(12)
+  status        ReviewStatus @default(PUBLISHED)
+  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([about, subjectId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("reviews")
+}

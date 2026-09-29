@@ -13,6 +13,11 @@ export function normalizePhone(raw: string, country?: string): string | null {
   return parsed?.isValid() ? parsed.number : null;
 }
 
+/** E.164 → the spaced international format people read, e.g. `+963944123456` → `+963 944 123 456`. */
+export function formatInternationalPhone(e164: string): string {
+  return parsePhoneNumberFromString(e164)?.formatInternational() ?? e164;
+}
+
 export function normalizeEmail(raw: string): string {
   return raw.trim().toLowerCase();
 }

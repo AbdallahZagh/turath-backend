@@ -19,6 +19,18 @@ export const IdentityPatterns = {
   PREFERENCES_UPDATE: 'identity.preferences.update',
 } as const;
 
+/** Message patterns for the guests (tourists) shown in the admin dashboard. */
+export const AdminUserPatterns = {
+  LIST: 'identity.admin.users.list',
+  GET: 'identity.admin.users.get',
+} as const;
+
+/** Message patterns for review moderation in the admin dashboard. */
+export const AdminReviewPatterns = {
+  LIST: 'identity.admin.reviews.list',
+  SET_STATUS: 'identity.admin.reviews.status',
+} as const;
+
 /** Message patterns for back-office (admin) accounts. */
 export const AdminPatterns = {
   CREATE: 'identity.admin.create',

@@ -25,5 +25,10 @@
   "NO_DUPLICATES": "احذف القيم المكررة.",
   "BOOLEAN": "يجب أن تكون true أو false.",
   "ADMIN_ROLE": "اختر دورًا: مشرف عام، مشرف، مراقب أو دعم.",
-  "ADMIN_PERMISSION": "تحتوي على صلاحية غير معروفة. راجع GET /admin/options للقيم المسموحة."
+  "ADMIN_PERMISSION": "تحتوي على صلاحية غير معروفة. راجع GET /admin/options للقيم المسموحة.",
+  "REVIEW_ABOUT": "اختر مزوّد خدمة أو ضيف.",
+  "REVIEW_STATUS": "اختر منشور أو مُبلَّغ عنه أو مخفي.",
+  "INTEGER": "أدخل عددًا صحيحًا.",
+  "MIN_VALUE": "يجب ألا يقل عن {constraints.0}.",
+  "MAX_VALUE": "يجب ألا يزيد عن {constraints.0}."
 }

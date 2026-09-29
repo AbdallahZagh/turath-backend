@@ -28,4 +28,7 @@ export const IdentityError = defineErrors('identity', {
   // back-office accounts
   ADMIN_NOT_FOUND: HttpStatus.NOT_FOUND,
   ADMIN_EMAIL_TAKEN: HttpStatus.CONFLICT,
+
+  // review moderation
+  REVIEW_NOT_FOUND: HttpStatus.NOT_FOUND,
 });
