@@ -38,6 +38,13 @@ export const AdminBookingPatterns = {
   SET_STATUS: 'identity.admin.bookings.status',
 } as const;
 
+/** Message patterns for the businesses table and detail page in the admin dashboard. */
+export const AdminProviderPatterns = {
+  LIST: 'identity.admin.providers.list',
+  EXPORT: 'identity.admin.providers.export',
+  GET: 'identity.admin.providers.get',
+} as const;
+
 /** Message patterns for back-office (admin) accounts. */
 export const AdminPatterns = {
   CREATE: 'identity.admin.create',

@@ -36,4 +36,7 @@ export const IdentityError = defineErrors('identity', {
   BOOKING_NOT_FOUND: HttpStatus.NOT_FOUND,
   BOOKING_STATUS_INVALID: HttpStatus.CONFLICT,
   BOOKING_STATUS_CHANGED: HttpStatus.CONFLICT,
+
+  // provider management
+  PROVIDER_NOT_FOUND: HttpStatus.NOT_FOUND,
 });

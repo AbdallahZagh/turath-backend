@@ -10,6 +10,7 @@ import {
 import { Prisma } from '../../generated/prisma/client.js';
 import { PrismaService } from '../../core/prisma/prisma.service.js';
 import { containsInsensitive } from '../../core/prisma/search.js';
+import { AdminProvidersCache } from '../admin-providers/admin-providers.cache.js';
 import { toAdminReview, toDbAbout, toDbStatus } from './review.mapper.js';
 
 /** Every filter given must match; `search` matches any of the text columns. */
@@ -34,7 +35,10 @@ function where({ about, stars, status, search }: AdminReviewListPayload): Prisma
 /** Review moderation for the admin dashboard. Only reachable through the gateway's API-key protected admin routes. */
 @Injectable()
 export class AdminReviewsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly providersCache: AdminProvidersCache,
+  ) {}
 
   /** One page of reviews, newest first. A page past the end is empty, not an error. */
   async list(query: AdminReviewListPayload): Promise<AdminReviewPage> {
@@ -54,6 +58,7 @@ export class AdminReviewsService {
   async setStatus({ id, status }: AdminReviewStatusPayload): Promise<AdminReview> {
     try {
       const review = await this.prisma.review.update({ where: { id }, data: { status: toDbStatus(status) } });
+      await this.providersCache.invalidate(); // business ratings and reviews lists show this review
       return toAdminReview(review);
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {

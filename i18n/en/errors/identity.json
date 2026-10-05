@@ -17,5 +17,6 @@
   "REVIEW_NOT_FOUND": "Review not found.",
   "BOOKING_NOT_FOUND": "Booking not found.",
   "BOOKING_STATUS_INVALID": "This booking can't be moved to that status from its current one.",
-  "BOOKING_STATUS_CHANGED": "Someone else just changed this booking. Reload it and try again."
+  "BOOKING_STATUS_CHANGED": "Someone else just changed this booking. Reload it and try again.",
+  "PROVIDER_NOT_FOUND": "Business not found."
 }

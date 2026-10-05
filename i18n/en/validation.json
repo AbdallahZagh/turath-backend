@@ -32,5 +32,8 @@
   "MIN_VALUE": "Must be at least {constraints.0}.",
   "MAX_VALUE": "Must be at most {constraints.0}.",
   "BOOKING_CATEGORY": "Choose hotels, dining, trips, events or guides.",
-  "BOOKING_STATUS": "Choose pending, confirmed, checkedIn, completed, cancelled, noShow or disputed."
+  "BOOKING_STATUS": "Choose pending, confirmed, checkedIn, completed, cancelled, noShow or disputed.",
+  "PROVIDER_STATUS": "Choose pending, approved, rejected or suspended.",
+  "PROVIDER_CATEGORY": "Choose hotels, dining, trips, events or guides.",
+  "GOVERNORATE": "Choose damascus, aleppo, latakia, tartus, homs, hama, palmyra or bosra."
 }

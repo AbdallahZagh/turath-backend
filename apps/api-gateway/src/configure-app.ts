@@ -26,6 +26,8 @@ export function configureApp(app: NestExpressApplication): { swaggerEnabled: boo
       .map((origin) => origin.trim())
       .filter(Boolean),
     credentials: true,
+    // So a browser can read the name and size of a CSV download (admin exports).
+    exposedHeaders: ['Content-Disposition', 'X-Export-Total', 'X-Export-Truncated'],
   });
 
   // → /api/v1/...   (GET /health stays at the root)

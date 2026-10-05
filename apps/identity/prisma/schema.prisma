@@ -112,24 +112,24 @@ enum ReviewStatus {
 /// Names are copied onto the row so a review still reads correctly if the
 /// account changes; `subjectId` / `authorId` link to `users` by id only.
 model Review {
-  id            String       @id @default(uuid()) @db.Uuid
-  about         ReviewAbout
+  id           String       @id @default(uuid()) @db.Uuid
+  about        ReviewAbout
   /// The provider or guest being rated. Null until providers exist as accounts.
-  subjectId     String?      @map("subject_id") @db.Uuid
+  subjectId    String?      @map("subject_id") @db.Uuid
   /// English name of the provider or guest being rated
-  subjectName   String       @map("subject_name") @db.VarChar(150)
-  authorId      String?      @map("author_id") @db.Uuid
-  authorNameEn  String       @map("author_name_en") @db.VarChar(100)
-  authorNameAr  String       @map("author_name_ar") @db.VarChar(100)
+  subjectName  String       @map("subject_name") @db.VarChar(150)
+  authorId     String?      @map("author_id") @db.Uuid
+  authorNameEn String       @map("author_name_en") @db.VarChar(100)
+  authorNameAr String       @map("author_name_ar") @db.VarChar(100)
   /// 1–5
-  stars         Int
-  bodyEn        String       @map("body_en") @db.VarChar(2000)
-  bodyAr        String       @map("body_ar") @db.VarChar(2000)
+  stars        Int
+  bodyEn       String       @map("body_en") @db.VarChar(2000)
+  bodyAr       String       @map("body_ar") @db.VarChar(2000)
   /// The booking this review is about (owned by the booking service)
-  bookingCode   String       @map("booking_code") @db.VarChar(12)
-  status        ReviewStatus @default(PUBLISHED)
-  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt     DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+  bookingCode  String       @map("booking_code") @db.VarChar(12)
+  status       ReviewStatus @default(PUBLISHED)
+  createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@index([about, subjectId])
   @@index([status])
@@ -194,4 +194,124 @@ model Booking {
   @@index([guestId])
   @@index([guestPhone])
   @@map("bookings")
+}
+
+enum ProviderStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+enum Governorate {
+  DAMASCUS
+  ALEPPO
+  LATAKIA
+  TARTUS
+  HOMS
+  HAMA
+  PALMYRA
+  BOSRA
+}
+
+/// Commission axis (rates live in the fees settings)
+enum CommissionTier {
+  PREFERRED
+  STANDARD
+  HIGH_RISK
+}
+
+/// Credit-ceiling axis, separate from the commission tier
+enum CreditTier {
+  NEW
+  ESTABLISHED
+  ENTERPRISE
+}
+
+enum ProviderDocumentKind {
+  COMMERCIAL_REGISTRATION
+  MINISTRY_LICENSE
+  OWNER_ID
+}
+
+enum ProviderAccountEventKind {
+  SUBMITTED
+  APPROVED
+  REJECTED
+  SUSPENDED
+  REINSTATED
+  FINANCE_UPDATED
+}
+
+/// A business that applied to list on the platform, reviewed from the admin
+/// dashboard. `category` uses the same five kinds as bookings. Bookings and
+/// reviews point at a provider by `providerId` / `subjectId` or, for older rows,
+/// by the English name.
+model Provider {
+  id                 String          @id @default(uuid()) @db.Uuid
+  nameEn             String          @map("name_en") @db.VarChar(150)
+  nameAr             String          @map("name_ar") @db.VarChar(150)
+  ownerEn            String          @map("owner_en") @db.VarChar(100)
+  ownerAr            String          @map("owner_ar") @db.VarChar(100)
+  category           BookingCategory
+  governorate        Governorate
+  status             ProviderStatus  @default(PENDING)
+  /// Day the application was submitted
+  submittedAt        DateTime        @map("submitted_at") @db.Date
+  /// E.164, e.g. +963931133207
+  phone              String          @db.VarChar(20)
+  /// Stored lower-case
+  email              String          @db.VarChar(150)
+  addressEn          String          @map("address_en") @db.VarChar(250)
+  addressAr          String          @map("address_ar") @db.VarChar(250)
+  descriptionEn      String          @map("description_en") @db.VarChar(2000)
+  descriptionAr      String          @map("description_ar") @db.VarChar(2000)
+  tier               CommissionTier  @default(STANDARD)
+  creditTier         CreditTier      @default(NEW) @map("credit_tier")
+  /// Replaces the tier's commission rate when set, as a fraction (0.1 = 10%)
+  commissionOverride Decimal?        @map("commission_override") @db.Decimal(5, 4)
+  /// Replaces the credit tier's ceiling when set
+  creditOverrideSyp  Int?            @map("credit_override_syp")
+  /// What the provider sells; the shape depends on `category` (see ProviderInventory in libs/contracts)
+  inventory          Json
+  createdAt          DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  documents     ProviderDocument[]
+  accountEvents ProviderAccountEvent[]
+
+  @@index([status, submittedAt])
+  @@index([category])
+  @@index([governorate])
+  @@index([nameEn])
+  @@map("providers")
+}
+
+model ProviderDocument {
+  id         String               @id @default(uuid()) @db.Uuid
+  providerId String               @map("provider_id") @db.Uuid
+  kind       ProviderDocumentKind
+  filename   String               @db.VarChar(200)
+  uploadedAt DateTime             @map("uploaded_at") @db.Date
+  createdAt  DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@index([providerId])
+  @@map("provider_documents")
+}
+
+/// The provider's account history (applied, approved, suspended…), oldest first.
+model ProviderAccountEvent {
+  id         String                   @id @default(uuid()) @db.Uuid
+  providerId String                   @map("provider_id") @db.Uuid
+  kind       ProviderAccountEventKind
+  /// Day it happened
+  at         DateTime                 @db.Date
+  createdAt  DateTime                 @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@index([providerId])
+  @@map("provider_account_events")
 }

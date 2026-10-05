@@ -429,6 +429,9 @@ describe('Swagger', () => {
       '/api/v1/admin/bookings',
       '/api/v1/admin/bookings/{id}',
       '/api/v1/admin/bookings/{id}/status',
+      '/api/v1/admin/providers',
+      '/api/v1/admin/providers/export',
+      '/api/v1/admin/providers/{id}',
     ]);
   });
 });

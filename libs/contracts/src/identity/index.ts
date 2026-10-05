@@ -5,6 +5,7 @@ export * from './auth.js';
 export * from './bookings.js';
 export * from './errors.js';
 export * from './patterns.js';
+export * from './providers.js';
 export * from './reviews.js';
 export * from './sessions.js';
 export * from './users.js';
