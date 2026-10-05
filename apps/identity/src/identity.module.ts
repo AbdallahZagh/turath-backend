@@ -6,6 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { identityEnvSchema } from '@turath/common';
 import { RedisModule } from '@turath/redis';
 import { CoreModule } from './core/core.module.js';
+import { AdminBookingsModule } from './modules/admin-bookings/admin-bookings.module.js';
 import { AdminReviewsModule } from './modules/admin-reviews/admin-reviews.module.js';
 import { AdminUsersModule } from './modules/admin-users/admin-users.module.js';
 import { AdminsModule } from './modules/admins/admins.module.js';
@@ -46,6 +47,7 @@ import { UsersModule } from './modules/users/users.module.js';
     AdminsModule,
     AdminUsersModule,
     AdminReviewsModule,
+    AdminBookingsModule,
     HealthModule,
   ],
 })

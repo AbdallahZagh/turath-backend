@@ -1,4 +1,5 @@
 import type { Page } from '@turath/common';
+import type { AdminBooking } from './bookings.js';
 import type { AdminReview } from './reviews.js';
 
 /** One lock / unlock in a guest's account history. */
@@ -33,37 +34,10 @@ export type AdminUserView = {
 /** One page of the guests list (`?page=&limit=`). */
 export type AdminUserPage = Page<AdminUserView>;
 
-export const BOOKING_STATUSES = [
-  'pending',
-  'confirmed',
-  'checkedIn',
-  'completed',
-  'cancelled',
-  'noShow',
-  'disputed',
-] as const;
-export type BookingStatus = (typeof BOOKING_STATUSES)[number];
-
-export const BOOKING_CATEGORIES = ['hotels', 'dining', 'trips', 'events', 'guides'] as const;
-export type BookingCategory = (typeof BOOKING_CATEGORIES)[number];
-
 type LocalizedText = { en: string; ar: string };
 
-/** A booking in a guest's history. Same shape as `AdminBooking` in the frontend mock. */
-export type AdminUserBooking = {
-  id: string;
-  code: string;
-  guest: LocalizedText;
-  phone: string;
-  provider: LocalizedText;
-  category: BookingCategory;
-  when: { start: string; end?: string; time?: string };
-  amountSyp: number;
-  status: BookingStatus;
-  couponCode?: string;
-  discountSyp?: number;
-  originalAmountSyp?: number;
-};
+/** A booking in a guest's history: the same shape as a row of the bookings table. */
+export type AdminUserBooking = AdminBooking;
 
 export const USER_ACTIVITY_CHANNELS = ['bookings', 'money', 'account'] as const;
 export type UserActivityChannel = (typeof USER_ACTIVITY_CHANNELS)[number];

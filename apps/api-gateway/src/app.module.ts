@@ -12,6 +12,7 @@ import { JwtAuthGuard, RolesGuard } from './core/auth/auth.guards.js';
 import { CoreModule } from './core/core.module.js';
 import { AppThrottlerGuard } from './core/guards/app-throttler.guard.js';
 import { AdminModule } from './modules/admin/admin.module.js';
+import { AdminBookingsModule } from './modules/admin-bookings/admin-bookings.module.js';
 import { AdminReviewsModule } from './modules/admin-reviews/admin-reviews.module.js';
 import { AdminUsersModule } from './modules/admin-users/admin-users.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
@@ -77,6 +78,7 @@ import { SessionsModule } from './modules/sessions/sessions.module.js';
     AdminModule,
     AdminUsersModule,
     AdminReviewsModule,
+    AdminBookingsModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },

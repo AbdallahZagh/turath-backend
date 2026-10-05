@@ -9,13 +9,8 @@ import {
 } from '@turath/contracts';
 import { Prisma } from '../../generated/prisma/client.js';
 import { PrismaService } from '../../core/prisma/prisma.service.js';
+import { containsInsensitive } from '../../core/prisma/search.js';
 import { toAdminReview, toDbAbout, toDbStatus } from './review.mapper.js';
-
-/** Prisma doesn't escape LIKE wildcards, so `%`, `_` and `\` are escaped to be searched for literally. */
-const contains = (search: string) => ({
-  contains: search.replace(/[\\%_]/g, '\\$&'),
-  mode: 'insensitive' as const,
-});
 
 /** Every filter given must match; `search` matches any of the text columns. */
 function where({ about, stars, status, search }: AdminReviewListPayload): Prisma.ReviewWhereInput {
@@ -25,12 +20,12 @@ function where({ about, stars, status, search }: AdminReviewListPayload): Prisma
     ...(status && { status: toDbStatus(status) }),
     ...(search && {
       OR: [
-        { subjectName: contains(search) },
-        { authorNameEn: contains(search) },
-        { authorNameAr: contains(search) },
-        { bodyEn: contains(search) },
-        { bodyAr: contains(search) },
-        { bookingCode: contains(search) },
+        { subjectName: containsInsensitive(search) },
+        { authorNameEn: containsInsensitive(search) },
+        { authorNameAr: containsInsensitive(search) },
+        { bodyEn: containsInsensitive(search) },
+        { bodyAr: containsInsensitive(search) },
+        { bookingCode: containsInsensitive(search) },
       ],
     }),
   };

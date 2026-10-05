@@ -30,5 +30,7 @@
   "REVIEW_STATUS": "Choose published, flagged or hidden.",
   "INTEGER": "Enter a whole number.",
   "MIN_VALUE": "Must be at least {constraints.0}.",
-  "MAX_VALUE": "Must be at most {constraints.0}."
+  "MAX_VALUE": "Must be at most {constraints.0}.",
+  "BOOKING_CATEGORY": "Choose hotels, dining, trips, events or guides.",
+  "BOOKING_STATUS": "Choose pending, confirmed, checkedIn, completed, cancelled, noShow or disputed."
 }

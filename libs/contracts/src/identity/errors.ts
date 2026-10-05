@@ -31,4 +31,9 @@ export const IdentityError = defineErrors('identity', {
 
   // review moderation
   REVIEW_NOT_FOUND: HttpStatus.NOT_FOUND,
+
+  // booking management
+  BOOKING_NOT_FOUND: HttpStatus.NOT_FOUND,
+  BOOKING_STATUS_INVALID: HttpStatus.CONFLICT,
+  BOOKING_STATUS_CHANGED: HttpStatus.CONFLICT,
 });

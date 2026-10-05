@@ -136,3 +136,62 @@ model Review {
   @@index([createdAt])
   @@map("reviews")
 }
+
+enum BookingCategory {
+  HOTELS
+  DINING
+  TRIPS
+  EVENTS
+  GUIDES
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CHECKED_IN
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+  DISPUTED
+}
+
+/// A reservation shown in the admin bookings table. Names and phone are copied
+/// onto the row so it still reads correctly if an account changes; `guestId` /
+/// `providerId` link to accounts by id only. Amounts are whole Syrian pounds.
+model Booking {
+  id                String          @id @default(uuid()) @db.Uuid
+  /// What the guest shows on arrival, 6 characters (A–Z, 0–9)
+  code              String          @unique @db.VarChar(12)
+  guestId           String?         @map("guest_id") @db.Uuid
+  guestNameEn       String          @map("guest_name_en") @db.VarChar(100)
+  guestNameAr       String          @map("guest_name_ar") @db.VarChar(100)
+  /// E.164, e.g. +963933441208
+  guestPhone        String          @map("guest_phone") @db.VarChar(20)
+  /// Null until providers exist as accounts
+  providerId        String?         @map("provider_id") @db.Uuid
+  providerNameEn    String          @map("provider_name_en") @db.VarChar(150)
+  providerNameAr    String          @map("provider_name_ar") @db.VarChar(150)
+  category          BookingCategory
+  /// First day (check-in, or the day of the visit)
+  startDate         DateTime        @map("start_date") @db.Date
+  /// Last day, for stays
+  endDate           DateTime?       @map("end_date") @db.Date
+  /// `HH:mm` (24h), for dining, events and guides
+  startTime         String?         @map("start_time") @db.VarChar(5)
+  /// What the guest pays, after any discount
+  amountSyp         Int             @map("amount_syp")
+  couponCode        String?         @map("coupon_code") @db.VarChar(40)
+  discountSyp       Int?            @map("discount_syp")
+  /// Price before the discount
+  originalAmountSyp Int?            @map("original_amount_syp")
+  status            BookingStatus   @default(PENDING)
+  createdAt         DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([createdAt])
+  @@index([status])
+  @@index([category])
+  @@index([guestId])
+  @@index([guestPhone])
+  @@map("bookings")
+}

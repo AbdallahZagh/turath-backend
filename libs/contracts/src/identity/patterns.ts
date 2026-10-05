@@ -31,6 +31,13 @@ export const AdminReviewPatterns = {
   SET_STATUS: 'identity.admin.reviews.status',
 } as const;
 
+/** Message patterns for the bookings table and drawer in the admin dashboard. */
+export const AdminBookingPatterns = {
+  LIST: 'identity.admin.bookings.list',
+  GET: 'identity.admin.bookings.get',
+  SET_STATUS: 'identity.admin.bookings.status',
+} as const;
+
 /** Message patterns for back-office (admin) accounts. */
 export const AdminPatterns = {
   CREATE: 'identity.admin.create',
