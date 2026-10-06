@@ -14,6 +14,7 @@ import { AdminLedgerHandler } from '../../src/modules/admin-ledger/admin-ledger.
 import { AdminProvidersHandler } from '../../src/modules/admin-providers/admin-providers.handler.js';
 import { AdminReviewsHandler } from '../../src/modules/admin-reviews/admin-reviews.handler.js';
 import { AdminOverviewHandler } from '../../src/modules/admin-overview/admin-overview.handler.js';
+import { DiscoverHandler } from '../../src/modules/discover/discover.handler.js';
 import { HeritageVisitsHandler } from '../../src/modules/heritage-visits/heritage-visits.handler.js';
 import { SearchHandler } from '../../src/modules/search/search.handler.js';
 import { AdminSettingsHandler } from '../../src/modules/admin-settings/admin-settings.handler.js';
@@ -44,6 +45,7 @@ export type IdentityHarness = {
   search: SearchHandler;
   adminOverview: AdminOverviewHandler;
   heritageVisits: HeritageVisitsHandler;
+  discover: DiscoverHandler;
   adminCoupons: AdminCouponsHandler;
   adminFeatured: AdminFeaturedHandler;
   prisma: PrismaService;
@@ -84,6 +86,7 @@ export async function createIdentity(): Promise<IdentityHarness> {
     search: app.get(SearchHandler),
     adminOverview: app.get(AdminOverviewHandler),
     heritageVisits: app.get(HeritageVisitsHandler),
+    discover: app.get(DiscoverHandler),
     adminCoupons: app.get(AdminCouponsHandler),
     adminFeatured: app.get(AdminFeaturedHandler),
     prisma,

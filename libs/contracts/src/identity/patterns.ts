@@ -25,6 +25,12 @@ export const AdminUserPatterns = {
   GET: 'identity.admin.users.get',
 } as const;
 
+/** Message patterns for the landing page search widget (public). */
+export const DiscoverPatterns = {
+  SEARCH: 'identity.discover.search',
+  OPTIONS: 'identity.discover.options',
+} as const;
+
 /** Message pattern for the admin dashboard home page. */
 export const AdminOverviewPatterns = {
   GET: 'identity.admin.overview.get',

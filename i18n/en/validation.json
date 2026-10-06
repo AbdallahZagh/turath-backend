@@ -64,5 +64,7 @@
   "SCORE_ORDER": "The scores must go down: VIP above standard above restricted.",
   "SEARCH_TYPE": "Choose heritageSite, provider, category or region.",
   "USER_ACCOUNT": "Choose active or locked.",
-  "RELIABILITY_TIER": "Choose vip, standard, restricted or suspended."
+  "RELIABILITY_TIER": "Choose vip, standard, restricted or suspended.",
+  "DISCOVER_TIME": "Choose 12:00, 14:00, 18:00 or 20:00.",
+  "DISCOVER_LANGUAGE": "Choose arabic, english, french, kurdish or turkish."
 }

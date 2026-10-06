@@ -64,5 +64,7 @@
   "SCORE_ORDER": "يجب أن تتناقص الدرجات: كبار العملاء فوق العادي فوق المقيَّد.",
   "SEARCH_TYPE": "اختر heritageSite أو provider أو category أو region.",
   "USER_ACCOUNT": "اختر active أو locked.",
-  "RELIABILITY_TIER": "اختر vip أو standard أو restricted أو suspended."
+  "RELIABILITY_TIER": "اختر vip أو standard أو restricted أو suspended.",
+  "DISCOVER_TIME": "اختر 12:00 أو 14:00 أو 18:00 أو 20:00.",
+  "DISCOVER_LANGUAGE": "اختر arabic أو english أو french أو kurdish أو turkish."
 }

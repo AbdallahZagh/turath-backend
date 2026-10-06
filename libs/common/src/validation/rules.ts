@@ -148,9 +148,9 @@ export function IsIntInRange({ min, max, optional = false }: { min: number; max:
 }
 
 /** `YYYY-MM-DD`, a real calendar day (2026-02-30 is refused). Time of day is not allowed. */
-export function IsCalendarDate() {
+export function IsCalendarDate({ optional = false }: { optional?: boolean } = {}) {
   return applyDecorators(
-    Required(),
+    optional ? IsOptional() : Required(),
     IsString({ message: msg('validation.STRING') }),
     Matches(/^\d{4}-\d{2}-\d{2}$/, { message: msg('validation.DATE') }),
     IsISO8601({ strict: true }, { message: msg('validation.DATE') }),

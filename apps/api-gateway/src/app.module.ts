@@ -20,6 +20,7 @@ import { AdminHeritageSitesModule } from './modules/admin-heritage-sites/admin-h
 import { AdminLedgerModule } from './modules/admin-ledger/admin-ledger.module.js';
 import { AdminProvidersModule } from './modules/admin-providers/admin-providers.module.js';
 import { AdminReviewsModule } from './modules/admin-reviews/admin-reviews.module.js';
+import { DiscoverModule } from './modules/discover/discover.module.js';
 import { AdminOverviewModule } from './modules/admin-overview/admin-overview.module.js';
 import { HeritageVisitsModule } from './modules/heritage-visits/heritage-visits.module.js';
 import { AdminSettingsModule } from './modules/admin-settings/admin-settings.module.js';
@@ -103,6 +104,7 @@ import { SessionsModule } from './modules/sessions/sessions.module.js';
     SearchModule,
     AdminOverviewModule,
     HeritageVisitsModule,
+    DiscoverModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
