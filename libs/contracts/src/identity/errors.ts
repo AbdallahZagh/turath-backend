@@ -41,6 +41,9 @@ export const IdentityError = defineErrors('identity', {
   DISPUTE_NOT_FOUND: HttpStatus.NOT_FOUND,
   DISPUTE_ALREADY_RESOLVED: HttpStatus.CONFLICT,
 
+  // provider accounts (ledger)
+  LEDGER_NOT_FOUND: HttpStatus.NOT_FOUND,
+
   // provider management
   PROVIDER_NOT_FOUND: HttpStatus.NOT_FOUND,
 });

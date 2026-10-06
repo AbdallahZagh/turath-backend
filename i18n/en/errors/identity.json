@@ -20,5 +20,6 @@
   "BOOKING_STATUS_CHANGED": "Someone else just changed this booking. Reload it and try again.",
   "DISPUTE_NOT_FOUND": "Dispute not found.",
   "DISPUTE_ALREADY_RESOLVED": "This dispute was already resolved the other way. Reload it to see the decision.",
+  "LEDGER_NOT_FOUND": "Account not found.",
   "PROVIDER_NOT_FOUND": "Business not found."
 }

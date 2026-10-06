@@ -45,6 +45,12 @@ export const AdminDisputePatterns = {
   RESOLVE: 'identity.admin.disputes.resolve',
 } as const;
 
+/** Message patterns for the provider accounts (ledger) table and page in the admin dashboard. */
+export const AdminLedgerPatterns = {
+  LIST: 'identity.admin.ledger.list',
+  GET: 'identity.admin.ledger.get',
+} as const;
+
 /** Message patterns for the businesses table and detail page in the admin dashboard. */
 export const AdminProviderPatterns = {
   LIST: 'identity.admin.providers.list',

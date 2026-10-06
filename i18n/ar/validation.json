@@ -38,5 +38,6 @@
   "GOVERNORATE": "اختر دمشق أو حلب أو اللاذقية أو طرطوس أو حمص أو حماة أو تدمر أو بصرى.",
   "DISPUTE_STATUS": "اختر open أو resolvedGuest أو resolvedProvider.",
   "DISPUTE_RESOLUTION": "اختر resolvedGuest (الحق مع الضيف) أو resolvedProvider (الحق مع المزوّد).",
-  "OBJECT": "يجب أن يكون كائنًا يحتوي على en و ar."
+  "OBJECT": "يجب أن يكون كائنًا يحتوي على en و ar.",
+  "LEDGER_STANDING": "اختر سليم أو تحت المراقبة أو فترة سماح أو موقوف."
 }

@@ -356,3 +356,46 @@ model Dispute {
   @@index([bookingCode])
   @@map("disputes")
 }
+
+enum LedgerStanding {
+  HEALTHY
+  WATCH
+  GRACE
+  SUSPENDED
+}
+
+enum SettlementCadence {
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+}
+
+/// What a provider owes the platform, shown on the admin accounts page. The name
+/// is copied onto the row; `providerId` links to `providers` by id only. Amounts
+/// are whole Syrian pounds. Statements are derived from the row, not stored.
+model LedgerAccount {
+  id               String            @id @default(uuid()) @db.Uuid
+  /// Null when the business has no provider record
+  providerId       String?           @map("provider_id") @db.Uuid
+  providerNameEn   String            @map("provider_name_en") @db.VarChar(150)
+  providerNameAr   String            @map("provider_name_ar") @db.VarChar(150)
+  category         BookingCategory
+  /// Commission earned by the platform so far
+  accruedSyp       Int               @map("accrued_syp")
+  /// What the provider has paid of it
+  paidSyp          Int               @map("paid_syp")
+  creditCeilingSyp Int               @map("credit_ceiling_syp")
+  /// Fraction of the ceiling in use (0.42 = 42%); above 1 means over the ceiling
+  creditUsed       Decimal           @default(0) @map("credit_used") @db.Decimal(6, 4)
+  cadence          SettlementCadence
+  /// Day of the last settlement
+  lastSettledAt    DateTime          @map("last_settled_at") @db.Date
+  standing         LedgerStanding    @default(HEALTHY)
+  createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([standing])
+  @@index([category])
+  @@index([providerNameEn])
+  @@map("ledger_accounts")
+}
