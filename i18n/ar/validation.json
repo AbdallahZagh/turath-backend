@@ -39,5 +39,6 @@
   "DISPUTE_STATUS": "اختر open أو resolvedGuest أو resolvedProvider.",
   "DISPUTE_RESOLUTION": "اختر resolvedGuest (الحق مع الضيف) أو resolvedProvider (الحق مع المزوّد).",
   "OBJECT": "يجب أن يكون كائنًا يحتوي على en و ar.",
-  "LEDGER_STANDING": "اختر سليم أو تحت المراقبة أو فترة سماح أو موقوف."
+  "RATE": "أدخل نسبة من 0 إلى 1 بحد أقصى 4 منازل عشرية (0.085 تعني 8.5%).",
+  "LEDGER_STANDING":"اختر سليم أو تحت المراقبة أو فترة سماح أو موقوف."
 }

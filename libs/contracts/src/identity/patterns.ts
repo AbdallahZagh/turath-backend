@@ -51,6 +51,12 @@ export const AdminLedgerPatterns = {
   GET: 'identity.admin.ledger.get',
 } as const;
 
+/** Message patterns for the fees page (exchange rate and commission rates) in the admin dashboard. */
+export const AdminFeePatterns = {
+  GET: 'identity.admin.fees.get',
+  SAVE: 'identity.admin.fees.save',
+} as const;
+
 /** Message patterns for the businesses table and detail page in the admin dashboard. */
 export const AdminProviderPatterns = {
   LIST: 'identity.admin.providers.list',

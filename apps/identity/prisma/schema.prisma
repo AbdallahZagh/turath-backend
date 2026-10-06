@@ -399,3 +399,23 @@ model LedgerAccount {
   @@index([providerNameEn])
   @@map("ledger_accounts")
 }
+
+/// Platform-wide fee settings: always exactly one row (`id = 1`).
+model FeeSettings {
+  id        Int      @id @default(1)
+  /// Syrian pounds per one US dollar
+  sypPerUsd Int      @map("syp_per_usd")
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("fee_settings")
+}
+
+/// The commission the platform takes on each kind of booking.
+model CommissionRate {
+  category  BookingCategory @id
+  /// As a fraction (0.12 = 12%)
+  rate      Decimal         @db.Decimal(5, 4)
+  updatedAt DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("commission_rates")
+}

@@ -39,5 +39,6 @@
   "DISPUTE_STATUS": "Choose open, resolvedGuest or resolvedProvider.",
   "DISPUTE_RESOLUTION": "Choose resolvedGuest (the guest is right) or resolvedProvider (the provider is right).",
   "OBJECT": "Must be an object with en and ar.",
-  "LEDGER_STANDING": "Choose healthy, watch, grace or suspended."
+  "RATE": "Enter a rate from 0 to 1 with at most 4 decimals (0.085 means 8.5%).",
+  "LEDGER_STANDING":"Choose healthy, watch, grace or suspended."
 }

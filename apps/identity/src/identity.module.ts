@@ -8,6 +8,7 @@ import { RedisModule } from '@turath/redis';
 import { CoreModule } from './core/core.module.js';
 import { AdminBookingsModule } from './modules/admin-bookings/admin-bookings.module.js';
 import { AdminDisputesModule } from './modules/admin-disputes/admin-disputes.module.js';
+import { AdminFeesModule } from './modules/admin-fees/admin-fees.module.js';
 import { AdminLedgerModule } from './modules/admin-ledger/admin-ledger.module.js';
 import { AdminProvidersModule } from './modules/admin-providers/admin-providers.module.js';
 import { AdminReviewsModule } from './modules/admin-reviews/admin-reviews.module.js';
@@ -54,6 +55,7 @@ import { UsersModule } from './modules/users/users.module.js';
     AdminProvidersModule,
     AdminDisputesModule,
     AdminLedgerModule,
+    AdminFeesModule,
     HealthModule,
   ],
 })
