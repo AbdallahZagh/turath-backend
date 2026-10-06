@@ -6,6 +6,7 @@ export * from './bookings.js';
 export * from './disputes.js';
 export * from './errors.js';
 export * from './fees.js';
+export * from './heritage-sites.js';
 export * from './ledger.js';
 export * from './patterns.js';
 export * from './providers.js';

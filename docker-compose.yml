@@ -9,6 +9,9 @@ x-app-env: &app-env
   JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev-only-access-secret-change-me-0123456789}
   JWT_ACCESS_TTL_SECONDS: ${JWT_ACCESS_TTL_SECONDS:-900}
   REFRESH_TTL_DAYS: ${REFRESH_TTL_DAYS:-30}
+  SUPABASE_URL: ${SUPABASE_URL:-}
+  SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
+  SUPABASE_BUCKET: ${SUPABASE_BUCKET:-heritage-sites}
 
 x-identity-db: &identity-db
   IDENTITY_DATABASE_URL: postgresql://${POSTGRES_USER:-turath}:${POSTGRES_PASSWORD:-turath}@postgres:5432/turath_identity

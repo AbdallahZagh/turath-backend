@@ -12,6 +12,16 @@ export const baseEnvSchema = Joi.object({
   JWT_ACCESS_SECRET: Joi.string().min(32).required(),
   JWT_ACCESS_TTL_SECONDS: Joi.number().integer().positive().default(900),
   REFRESH_TTL_DAYS: Joi.number().integer().positive().default(30),
+  // Supabase Storage for uploaded images. Empty = uploads are off (everything else still works).
+  // The service-role key can write anywhere in the project: keep it on the server, never in the frontend.
+  SUPABASE_URL: Joi.string()
+    .uri({ scheme: ['http', 'https'] })
+    .allow('')
+    .default(''),
+  SUPABASE_SERVICE_ROLE_KEY: Joi.string().allow('').default(''),
+  SUPABASE_BUCKET: Joi.string()
+    .pattern(/^[a-z0-9][a-z0-9-]{1,62}$/)
+    .default('heritage-sites'),
 }).unknown(true);
 
 export const gatewayEnvSchema = baseEnvSchema.keys({

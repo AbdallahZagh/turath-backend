@@ -1,0 +1,9 @@
+{
+  "IMAGE_REQUIRED": "Choose an image to upload.",
+  "TOO_MANY_IMAGES": "You can upload at most {max} images at a time.",
+  "IMAGE_TOO_LARGE": "The image is larger than {maxMb} MB. Choose a smaller one.",
+  "IMAGE_TYPE_UNSUPPORTED": "Only JPEG, PNG or WebP images are accepted.",
+  "IMAGE_UNREADABLE": "The image is damaged or too large in pixels. Try another one.",
+  "STORAGE_NOT_CONFIGURED": "Image uploads are not set up yet.",
+  "STORAGE_UPLOAD_FAILED": "The image could not be saved. Please try again."
+}

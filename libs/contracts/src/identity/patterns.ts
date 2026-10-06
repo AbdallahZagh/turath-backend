@@ -57,6 +57,15 @@ export const AdminFeePatterns = {
   SAVE: 'identity.admin.fees.save',
 } as const;
 
+/** Message patterns for the heritage sites table and page in the admin dashboard. */
+export const AdminHeritageSitePatterns = {
+  LIST: 'identity.admin.heritage-sites.list',
+  GET: 'identity.admin.heritage-sites.get',
+  CREATE: 'identity.admin.heritage-sites.create',
+  UPDATE: 'identity.admin.heritage-sites.update',
+  DELETE: 'identity.admin.heritage-sites.delete',
+} as const;
+
 /** Message patterns for the businesses table and detail page in the admin dashboard. */
 export const AdminProviderPatterns = {
   LIST: 'identity.admin.providers.list',

@@ -21,5 +21,6 @@
   "DISPUTE_NOT_FOUND": "النزاع غير موجود.",
   "DISPUTE_ALREADY_RESOLVED": "تم حسم هذا النزاع بقرار مختلف بالفعل. أعد تحميله لرؤية القرار.",
   "LEDGER_NOT_FOUND": "الحساب غير موجود.",
+  "HERITAGE_SITE_NOT_FOUND": "الموقع التراثي غير موجود.",
   "PROVIDER_NOT_FOUND": "المنشأة غير موجودة."
 }

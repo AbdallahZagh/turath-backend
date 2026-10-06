@@ -65,7 +65,13 @@ describe('admin review list', () => {
   describe('filters', () => {
     beforeEach(async () => {
       await addReview({ subjectName: 'Beit Al-Wali', stars: 5, createdAt: new Date('2026-08-05') });
-      await addReview({ about: 'GUEST', subjectName: 'Omar Nseir', stars: 2, status: 'FLAGGED', createdAt: new Date('2026-08-04') });
+      await addReview({
+        about: 'GUEST',
+        subjectName: 'Omar Nseir',
+        stars: 2,
+        status: 'FLAGGED',
+        createdAt: new Date('2026-08-04'),
+      });
       await addReview({
         subjectName: 'Citadel Walks',
         stars: 2,
@@ -152,8 +158,20 @@ describe('reviews on the guest detail', () => {
     const guest = await h.prisma.user.create({
       data: { fullName: 'Omar Nseir', phone: '+963955870014', phoneVerifiedAt: new Date('2026-01-01') },
     });
-    await addReview({ about: 'GUEST', subjectId: guest.id, subjectName: 'Omar Nseir', createdAt: new Date('2026-07-01'), stars: 2 });
-    await addReview({ about: 'GUEST', subjectId: guest.id, subjectName: 'Omar Nseir', createdAt: new Date('2026-08-01'), status: 'HIDDEN' });
+    await addReview({
+      about: 'GUEST',
+      subjectId: guest.id,
+      subjectName: 'Omar Nseir',
+      createdAt: new Date('2026-07-01'),
+      stars: 2,
+    });
+    await addReview({
+      about: 'GUEST',
+      subjectId: guest.id,
+      subjectName: 'Omar Nseir',
+      createdAt: new Date('2026-08-01'),
+      status: 'HIDDEN',
+    });
     await addReview({ about: 'GUEST', subjectId: '55555555-5555-4555-8555-555555555555', subjectName: 'Someone else' });
     await addReview({ about: 'PROVIDER', subjectId: guest.id, subjectName: 'Not a guest review' });
 

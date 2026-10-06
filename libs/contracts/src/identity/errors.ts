@@ -44,6 +44,9 @@ export const IdentityError = defineErrors('identity', {
   // provider accounts (ledger)
   LEDGER_NOT_FOUND: HttpStatus.NOT_FOUND,
 
+  // heritage sites
+  HERITAGE_SITE_NOT_FOUND: HttpStatus.NOT_FOUND,
+
   // provider management
   PROVIDER_NOT_FOUND: HttpStatus.NOT_FOUND,
 });

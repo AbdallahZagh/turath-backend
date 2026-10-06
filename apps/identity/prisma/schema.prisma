@@ -419,3 +419,35 @@ model CommissionRate {
 
   @@map("commission_rates")
 }
+
+/// A heritage site shown to tourists and managed from the admin dashboard.
+/// Images are links (Supabase Storage for uploads); `gallery` is the extra photos in order.
+model HeritageSite {
+  id          String      @id @default(uuid()) @db.Uuid
+  /// URL-safe name, made from the English name when the site is created and never changed
+  slug        String      @unique @db.VarChar(160)
+  nameEn      String      @map("name_en") @db.VarChar(150)
+  nameAr      String      @map("name_ar") @db.VarChar(150)
+  narrativeEn String      @map("narrative_en") @db.VarChar(2000)
+  narrativeAr String      @map("narrative_ar") @db.VarChar(2000)
+  governorate Governorate
+  /// Cover image: an https link or a path of the frontend (`/images/...`)
+  imageSrc    String      @map("image_src") @db.VarChar(500)
+  gallery     String[]    @default([])
+  /// `HH:mm` (24h); closing before opening means it stays open past midnight
+  opensAt     String      @map("opens_at") @db.VarChar(5)
+  closesAt    String      @map("closes_at") @db.VarChar(5)
+  /// Whole Syrian pounds; 0 is free
+  entryFeeSyp Int         @map("entry_fee_syp")
+  latitude    Float
+  longitude   Float
+  /// Drafts are only visible to admins
+  published   Boolean     @default(false)
+  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([governorate])
+  @@index([published])
+  @@index([createdAt])
+  @@map("heritage_sites")
+}

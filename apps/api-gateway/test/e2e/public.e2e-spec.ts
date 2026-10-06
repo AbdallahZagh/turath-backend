@@ -432,6 +432,16 @@ describe('Swagger', () => {
       '/api/v1/admin/providers',
       '/api/v1/admin/providers/export',
       '/api/v1/admin/providers/{id}',
+      '/api/v1/admin/disputes',
+      '/api/v1/admin/disputes/{id}',
+      '/api/v1/admin/disputes/{id}/resolve',
+      '/api/v1/admin/accounts',
+      '/api/v1/admin/accounts/{id}',
+      '/api/v1/admin/fees',
+      '/api/v1/admin/heritage-sites',
+      '/api/v1/admin/heritage-sites/images/cover',
+      '/api/v1/admin/heritage-sites/images/gallery',
+      '/api/v1/admin/heritage-sites/{id}',
     ]);
   });
 });

@@ -1,0 +1,9 @@
+{
+  "IMAGE_REQUIRED": "اختر صورة لرفعها.",
+  "TOO_MANY_IMAGES": "يمكنك رفع {max} صور على الأكثر في المرة الواحدة.",
+  "IMAGE_TOO_LARGE": "حجم الصورة أكبر من {maxMb} ميغابايت. اختر صورة أصغر.",
+  "IMAGE_TYPE_UNSUPPORTED": "الصور المقبولة هي JPEG أو PNG أو WebP فقط.",
+  "IMAGE_UNREADABLE": "الصورة تالفة أو أبعادها كبيرة جدًا. جرّب صورة أخرى.",
+  "STORAGE_NOT_CONFIGURED": "رفع الصور غير مُعدّ بعد.",
+  "STORAGE_UPLOAD_FAILED": "تعذّر حفظ الصورة. يرجى المحاولة مجددًا."
+}
