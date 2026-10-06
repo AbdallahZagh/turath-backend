@@ -22,5 +22,9 @@
   "DISPUTE_ALREADY_RESOLVED": "تم حسم هذا النزاع بقرار مختلف بالفعل. أعد تحميله لرؤية القرار.",
   "LEDGER_NOT_FOUND": "الحساب غير موجود.",
   "HERITAGE_SITE_NOT_FOUND": "الموقع التراثي غير موجود.",
+  "TAXONOMY_TERM_NOT_FOUND": "العنصر غير موجود.",
+  "TAXONOMY_SLUG_TAKEN": "يوجد عنصر آخر في هذه القائمة يستخدم هذا المعرّف النصي.",
+  "TAXONOMY_KIND_MISMATCH": "لا يمكن نقل العنصر إلى قائمة أخرى.",
+  "TAXONOMY_LIMIT_REACHED": "هذه القائمة ممتلئة ({max} عنصرًا). احذف عنصرًا قبل إضافة آخر.",
   "PROVIDER_NOT_FOUND": "المنشأة غير موجودة."
 }

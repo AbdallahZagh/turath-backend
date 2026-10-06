@@ -45,5 +45,7 @@
   "IMAGE_URL": "Use an https image link, or a path starting with /.",
   "NUMBER": "Enter a number.",
   "MAX_ITEMS": "Add at most {constraints.0} items.",
-  "HERITAGE_STATUS": "Choose published or draft."
+  "HERITAGE_STATUS": "Choose published or draft.",
+  "TAXONOMY_KIND": "Choose categories, amenities or governorates.",
+  "DIRECTION": "Choose -1 (up) or 1 (down)."
 }

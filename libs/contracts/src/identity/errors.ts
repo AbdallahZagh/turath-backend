@@ -47,6 +47,12 @@ export const IdentityError = defineErrors('identity', {
   // heritage sites
   HERITAGE_SITE_NOT_FOUND: HttpStatus.NOT_FOUND,
 
+  // categories, amenities and regions
+  TAXONOMY_TERM_NOT_FOUND: HttpStatus.NOT_FOUND,
+  TAXONOMY_SLUG_TAKEN: HttpStatus.CONFLICT,
+  TAXONOMY_KIND_MISMATCH: HttpStatus.BAD_REQUEST,
+  TAXONOMY_LIMIT_REACHED: HttpStatus.CONFLICT,
+
   // provider management
   PROVIDER_NOT_FOUND: HttpStatus.NOT_FOUND,
 });

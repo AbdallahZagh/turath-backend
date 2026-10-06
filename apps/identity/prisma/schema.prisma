@@ -451,3 +451,27 @@ model HeritageSite {
   @@index([createdAt])
   @@map("heritage_sites")
 }
+
+enum TaxonomyKind {
+  CATEGORIES
+  AMENITIES
+  GOVERNORATES
+}
+
+/// An entry of one of the admin-managed lists (categories, amenities, regions), shown in
+/// `sort_order` within its kind. Names are per language; the slug is unique within the kind.
+model TaxonomyTerm {
+  id        String       @id @default(uuid()) @db.Uuid
+  kind      TaxonomyKind
+  slug      String       @db.VarChar(80)
+  nameEn    String       @map("name_en") @db.VarChar(100)
+  nameAr    String       @map("name_ar") @db.VarChar(100)
+  /// 1, 2, 3… within the kind; kept gap-free by every write
+  sortOrder Int          @map("sort_order")
+  createdAt DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([kind, slug])
+  @@index([kind, sortOrder])
+  @@map("taxonomy_terms")
+}

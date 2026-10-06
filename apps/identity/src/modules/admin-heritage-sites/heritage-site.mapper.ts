@@ -1,3 +1,4 @@
+import { slugify } from '@turath/common';
 import type { AdminHeritageSite, Governorate } from '@turath/contracts';
 import type { Governorate as DbGovernorate, HeritageSite } from '../../generated/prisma/client.js';
 
@@ -29,13 +30,5 @@ const MAX_SLUG_LENGTH = 150;
  * URL-safe slug from the English name (letters and digits, joined by dashes), like the frontend
  * mock. A name with no Latin letters or digits falls back to `site-` plus the start of the id.
  */
-export function slugFromName(name: string, id: string): string {
-  const slug = name
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, MAX_SLUG_LENGTH)
-    .replace(/-+$/g, '');
-  return slug.length > 0 ? slug : `site-${id.slice(0, 8)}`;
-}
+export const slugFromName = (name: string, id: string): string =>
+  slugify(name, `site-${id.slice(0, 8)}`, MAX_SLUG_LENGTH);

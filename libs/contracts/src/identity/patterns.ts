@@ -66,6 +66,15 @@ export const AdminHeritageSitePatterns = {
   DELETE: 'identity.admin.heritage-sites.delete',
 } as const;
 
+/** Message patterns for the categories, amenities and regions lists in the admin dashboard. */
+export const AdminTaxonomyPatterns = {
+  LIST: 'identity.admin.taxonomy.list',
+  CREATE: 'identity.admin.taxonomy.create',
+  UPDATE: 'identity.admin.taxonomy.update',
+  MOVE: 'identity.admin.taxonomy.move',
+  DELETE: 'identity.admin.taxonomy.delete',
+} as const;
+
 /** Message patterns for the businesses table and detail page in the admin dashboard. */
 export const AdminProviderPatterns = {
   LIST: 'identity.admin.providers.list',

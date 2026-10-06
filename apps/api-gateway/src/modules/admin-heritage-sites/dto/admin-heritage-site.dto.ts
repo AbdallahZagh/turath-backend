@@ -1,21 +1,18 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform, Type } from 'class-transformer';
+import { Transform } from 'class-transformer';
 import {
   ArrayMaxSize,
   ArrayUnique,
   IsArray,
   IsBoolean,
-  IsDefined,
   IsNumber,
-  IsObject,
   IsOptional,
   IsString,
   Matches,
   Max,
   MaxLength,
   Min,
-  ValidateNested,
 } from 'class-validator';
 import { i18nValidationMessage as msg } from 'nestjs-i18n';
 import { IsIntInRange, IsOneOf, IsText, Required, trim } from '@turath/common';
@@ -36,6 +33,7 @@ import {
   type UpdateHeritageSiteInput,
   type UploadedImage,
 } from '@turath/contracts';
+import { IsNestedObject } from '../../../core/dto/nested-object.js';
 import { PageQueryDto } from '../../../core/dto/page-query.dto.js';
 import { LocalizedNameDto } from '../../admin-users/dto/admin-user.dto.js';
 
@@ -90,16 +88,6 @@ function IsDecimalInRange(min: number, max: number) {
     IsNumber({ allowNaN: false, allowInfinity: false }, { message: msg('validation.NUMBER') }),
     Min(min, { message: msg('validation.MIN_VALUE') }),
     Max(max, { message: msg('validation.MAX_VALUE') }),
-  );
-}
-
-/** A required object, validated against its own class. */
-function IsNestedObject(type: new () => object) {
-  return applyDecorators(
-    IsDefined({ message: msg('validation.REQUIRED') }),
-    IsObject({ message: msg('validation.OBJECT') }),
-    ValidateNested(),
-    Type(() => type),
   );
 }
 

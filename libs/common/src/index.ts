@@ -9,3 +9,4 @@ export * from './preferences.js';
 export * from './rpc/rpc.js';
 export * from './storage/index.js';
 export * from './validation/index.js';
+export * from './text/slug.js';

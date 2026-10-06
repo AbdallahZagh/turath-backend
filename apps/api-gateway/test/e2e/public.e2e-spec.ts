@@ -442,6 +442,9 @@ describe('Swagger', () => {
       '/api/v1/admin/heritage-sites/images/cover',
       '/api/v1/admin/heritage-sites/images/gallery',
       '/api/v1/admin/heritage-sites/{id}',
+      '/api/v1/admin/lists',
+      '/api/v1/admin/lists/{id}',
+      '/api/v1/admin/lists/{id}/move',
     ]);
   });
 });

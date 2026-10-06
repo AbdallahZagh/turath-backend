@@ -13,6 +13,7 @@ import { AdminHeritageSitesModule } from './modules/admin-heritage-sites/admin-h
 import { AdminLedgerModule } from './modules/admin-ledger/admin-ledger.module.js';
 import { AdminProvidersModule } from './modules/admin-providers/admin-providers.module.js';
 import { AdminReviewsModule } from './modules/admin-reviews/admin-reviews.module.js';
+import { AdminTaxonomyModule } from './modules/admin-taxonomy/admin-taxonomy.module.js';
 import { AdminUsersModule } from './modules/admin-users/admin-users.module.js';
 import { AdminsModule } from './modules/admins/admins.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
@@ -58,6 +59,7 @@ import { UsersModule } from './modules/users/users.module.js';
     AdminLedgerModule,
     AdminFeesModule,
     AdminHeritageSitesModule,
+    AdminTaxonomyModule,
     HealthModule,
   ],
 })

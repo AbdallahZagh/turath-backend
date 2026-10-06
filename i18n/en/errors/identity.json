@@ -22,5 +22,9 @@
   "DISPUTE_ALREADY_RESOLVED": "This dispute was already resolved the other way. Reload it to see the decision.",
   "LEDGER_NOT_FOUND": "Account not found.",
   "HERITAGE_SITE_NOT_FOUND": "Heritage site not found.",
+  "TAXONOMY_TERM_NOT_FOUND": "Item not found.",
+  "TAXONOMY_SLUG_TAKEN": "Another item in this list already uses that slug.",
+  "TAXONOMY_KIND_MISMATCH": "An item cannot be moved to another list.",
+  "TAXONOMY_LIMIT_REACHED": "This list is full ({max} items). Delete one before adding another.",
   "PROVIDER_NOT_FOUND": "Business not found."
 }
