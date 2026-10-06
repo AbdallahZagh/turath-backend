@@ -23,7 +23,6 @@ beforeAll(async () => {
 afterAll(() => h.close());
 beforeEach(async () => {
   await h.reset();
-  await h.prisma.$executeRawUnsafe('TRUNCATE TABLE heritage_sites');
   fetchMock = vi.fn().mockResolvedValue(new Response('[]', { status: 200 }));
   vi.stubGlobal('fetch', fetchMock);
 });

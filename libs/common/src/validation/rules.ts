@@ -146,3 +146,38 @@ export function IsIntInRange({ min, max, optional = false }: { min: number; max:
     Max(max, { message: msg('validation.MAX_VALUE') }),
   );
 }
+
+/** `YYYY-MM-DD`, a real calendar day (2026-02-30 is refused). Time of day is not allowed. */
+export function IsCalendarDate() {
+  return applyDecorators(
+    Required(),
+    IsString({ message: msg('validation.STRING') }),
+    Matches(/^\d{4}-\d{2}-\d{2}$/, { message: msg('validation.DATE') }),
+    IsISO8601({ strict: true }, { message: msg('validation.DATE') }),
+  );
+}
+
+const DAY = /^\d{4}-\d{2}-\d{2}$/;
+const isDay = (value: unknown): value is string => typeof value === 'string' && DAY.test(value);
+
+/**
+ * The value must not be earlier than the text value of another field of the same object
+ * (`YYYY-MM-DD` days compare correctly as text). It says nothing when either one is not a `YYYY-MM-DD` day:
+ * that field's own rules report it.
+ */
+export function IsNotBefore(otherField: string, messageKey = 'validation.DATE_RANGE') {
+  return (target: object, propertyName: string | symbol) =>
+    registerDecorator({
+      name: 'isNotBefore',
+      target: target.constructor,
+      propertyName: String(propertyName),
+      constraints: [otherField],
+      options: { message: msg(messageKey) },
+      validator: {
+        validate(value: unknown, args): boolean {
+          const other = (args?.object as Record<string, unknown> | undefined)?.[otherField];
+          return !isDay(value) || !isDay(other) || value >= other;
+        },
+      },
+    });
+}

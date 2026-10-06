@@ -26,5 +26,11 @@
   "TAXONOMY_SLUG_TAKEN": "Another item in this list already uses that slug.",
   "TAXONOMY_KIND_MISMATCH": "An item cannot be moved to another list.",
   "TAXONOMY_LIMIT_REACHED": "This list is full ({max} items). Delete one before adding another.",
+  "PROMOTION_NOT_FOUND": "Promotion not found.",
+  "PROMOTION_KIND_SLOT_MISMATCH": "This slot takes a different kind of promotion: only the home campaign slot takes campaigns.",
+  "PROMOTION_LINK_NOT_FOUND": "The business, site or category to link to does not exist.",
+  "PROMOTION_LINK_UNAVAILABLE": "A promotion can only link to an approved business or a published heritage site.",
+  "FEATURED_SLOT_DISABLED": "This slot is switched off. Turn on featuring and this slot in Settings first.",
+  "FEATURED_SLOT_AT_CAPACITY": "This slot is full ({capacity} at a time). End or delete a promotion in it first.",
   "PROVIDER_NOT_FOUND": "Business not found."
 }

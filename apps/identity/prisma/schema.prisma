@@ -279,6 +279,7 @@ model Provider {
 
   documents     ProviderDocument[]
   accountEvents ProviderAccountEvent[]
+  promotions    Promotion[]
 
   @@index([status, submittedAt])
   @@index([category])
@@ -446,6 +447,8 @@ model HeritageSite {
   createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
 
+  promotions Promotion[]
+
   @@index([governorate])
   @@index([published])
   @@index([createdAt])
@@ -474,4 +477,72 @@ model TaxonomyTerm {
   @@unique([kind, slug])
   @@index([kind, sortOrder])
   @@map("taxonomy_terms")
+}
+
+/// The named places on the home page a promotion can occupy. Capacity per slot lives in libs/contracts.
+enum FeaturedSlot {
+  HERITAGE_SPOTLIGHT
+  PILLAR_HOTELS
+  PILLAR_DINING
+  PILLAR_TRIPS
+  PILLAR_EVENTS
+  PILLAR_GUIDES
+  HOME_CAMPAIGN
+  PERSONA_RAIL
+}
+
+/// `CAMPAIGN` only fits `HOME_CAMPAIGN`; every other slot takes `FEATURED`.
+enum PromotionKind {
+  FEATURED
+  CAMPAIGN
+}
+
+/// A promotion pinned to a home page slot between two days (both included), managed from the
+/// admin Featured page. Whether it is scheduled, live or ended follows from today's date.
+model Promotion {
+  id             String           @id @default(uuid()) @db.Uuid
+  titleEn        String           @map("title_en") @db.VarChar(150)
+  titleAr        String           @map("title_ar") @db.VarChar(150)
+  kind           PromotionKind
+  slot           FeaturedSlot
+  /// What is promoted, as free text in both languages (a business, a site, a category…)
+  targetEn       String           @map("target_en") @db.VarChar(150)
+  targetAr       String           @map("target_ar") @db.VarChar(150)
+  /// What the promotion opens, when it is linked: at most one of these three is set
+  providerId     String?          @map("provider_id") @db.Uuid
+  heritageSiteId String?          @map("heritage_site_id") @db.Uuid
+  category       BookingCategory?
+  startAt        DateTime         @map("start_at") @db.Date
+  endAt          DateTime         @map("end_at") @db.Date
+  createdAt      DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  /// The link goes away (the promotion stays) when the business or site is deleted
+  provider     Provider?     @relation(fields: [providerId], references: [id], onDelete: SetNull)
+  heritageSite HeritageSite? @relation(fields: [heritageSiteId], references: [id], onDelete: SetNull)
+
+  @@index([slot, endAt])
+  @@index([startAt, endAt])
+  @@index([createdAt])
+  @@index([providerId])
+  @@index([heritageSiteId])
+  @@map("promotions")
+}
+
+/// Master switch for home page featuring: always exactly one row (`id = 1`).
+model FeaturedSettings {
+  id               Int      @id @default(1)
+  featuringEnabled Boolean  @default(true) @map("featuring_enabled")
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("featured_settings")
+}
+
+/// Per-slot switch. A slot without a row is on.
+model FeaturedSlotSetting {
+  slot      FeaturedSlot @id
+  enabled   Boolean
+  updatedAt DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("featured_slot_settings")
 }

@@ -47,5 +47,10 @@
   "MAX_ITEMS": "Add at most {constraints.0} items.",
   "HERITAGE_STATUS": "Choose published or draft.",
   "TAXONOMY_KIND": "Choose categories, amenities or governorates.",
-  "DIRECTION": "Choose -1 (up) or 1 (down)."
+  "DIRECTION": "Choose -1 (up) or 1 (down).",
+  "FEATURED_SLOT": "Choose one of the home page slots.",
+  "PROMOTION_KIND": "Choose featured or campaign.",
+  "PROMOTION_STATUS": "Choose scheduled, live or ended.",
+  "DATE_RANGE": "The end date can't be before the start date.",
+  "PROMOTION_LINK_TYPE": "Choose category, heritageSite or provider."
 }

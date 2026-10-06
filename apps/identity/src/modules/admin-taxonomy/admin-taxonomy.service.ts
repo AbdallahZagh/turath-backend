@@ -14,6 +14,7 @@ import {
 } from '@turath/contracts';
 import { PrismaService } from '../../core/prisma/prisma.service.js';
 import { Prisma, type TaxonomyKind as DbKind } from '../../generated/prisma/client.js';
+import { AdminFeaturedCache } from '../admin-featured/admin-featured.cache.js';
 import { AdminTaxonomyCache } from './admin-taxonomy.cache.js';
 import { toAdminTaxonomyTerm, toApiKind, toDbKind } from './taxonomy.mapper.js';
 
@@ -44,6 +45,7 @@ export class AdminTaxonomyService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cache: AdminTaxonomyCache,
+    private readonly featuredCache: AdminFeaturedCache,
   ) {}
 
   /** The terms of every list (or of one `kind`), each list in its order. */
@@ -139,7 +141,8 @@ export class AdminTaxonomyService {
   private async write<T>(change: (tx: Tx) => Promise<T>): Promise<T> {
     try {
       const result = await this.prisma.$transaction(change);
-      await this.cache.invalidate();
+      // Promotions linked to a category show its name from this list.
+      await Promise.all([this.cache.invalidate(), this.featuredCache.invalidate()]);
       return result;
     } catch (error) {
       if (isUniqueViolation(error)) throw rpcError(IdentityError.TAXONOMY_SLUG_TAKEN);

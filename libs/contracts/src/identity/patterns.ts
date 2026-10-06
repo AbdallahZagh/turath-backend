@@ -75,6 +75,19 @@ export const AdminTaxonomyPatterns = {
   DELETE: 'identity.admin.taxonomy.delete',
 } as const;
 
+/** Message patterns for the Featured page (home page promotions) in the admin dashboard, and the live ones the home page shows. */
+export const AdminFeaturedPatterns = {
+  LIST: 'identity.admin.featured.list',
+  GET: 'identity.admin.featured.get',
+  CREATE: 'identity.admin.featured.create',
+  UPDATE: 'identity.admin.featured.update',
+  DELETE: 'identity.admin.featured.delete',
+  TARGETS: 'identity.admin.featured.targets',
+  SLOTS: 'identity.admin.featured.slots',
+  SLOTS_SAVE: 'identity.admin.featured.slots.save',
+  LIVE: 'identity.featured.live',
+} as const;
+
 /** Message patterns for the businesses table and detail page in the admin dashboard. */
 export const AdminProviderPatterns = {
   LIST: 'identity.admin.providers.list',

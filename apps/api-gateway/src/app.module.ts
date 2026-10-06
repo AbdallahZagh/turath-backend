@@ -20,6 +20,7 @@ import { AdminLedgerModule } from './modules/admin-ledger/admin-ledger.module.js
 import { AdminProvidersModule } from './modules/admin-providers/admin-providers.module.js';
 import { AdminReviewsModule } from './modules/admin-reviews/admin-reviews.module.js';
 import { AdminTaxonomyModule } from './modules/admin-taxonomy/admin-taxonomy.module.js';
+import { FeaturedModule } from './modules/featured/featured.module.js';
 import { AdminUsersModule } from './modules/admin-users/admin-users.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { HealthModule } from './modules/health/health.module.js';
@@ -91,6 +92,7 @@ import { SessionsModule } from './modules/sessions/sessions.module.js';
     AdminFeesModule,
     AdminHeritageSitesModule,
     AdminTaxonomyModule,
+    FeaturedModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },

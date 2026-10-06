@@ -53,6 +53,14 @@ export const IdentityError = defineErrors('identity', {
   TAXONOMY_KIND_MISMATCH: HttpStatus.BAD_REQUEST,
   TAXONOMY_LIMIT_REACHED: HttpStatus.CONFLICT,
 
+  // featured promotions
+  PROMOTION_NOT_FOUND: HttpStatus.NOT_FOUND,
+  PROMOTION_KIND_SLOT_MISMATCH: HttpStatus.BAD_REQUEST,
+  PROMOTION_LINK_NOT_FOUND: HttpStatus.BAD_REQUEST,
+  PROMOTION_LINK_UNAVAILABLE: HttpStatus.CONFLICT,
+  FEATURED_SLOT_DISABLED: HttpStatus.CONFLICT,
+  FEATURED_SLOT_AT_CAPACITY: HttpStatus.CONFLICT,
+
   // provider management
   PROVIDER_NOT_FOUND: HttpStatus.NOT_FOUND,
 });

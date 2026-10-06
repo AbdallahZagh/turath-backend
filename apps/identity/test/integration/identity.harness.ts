@@ -6,6 +6,7 @@ import { PrismaService } from '../../src/core/prisma/prisma.service.js';
 import { IdentityModule } from '../../src/identity.module.js';
 import { AdminBookingsHandler } from '../../src/modules/admin-bookings/admin-bookings.handler.js';
 import { AdminDisputesHandler } from '../../src/modules/admin-disputes/admin-disputes.handler.js';
+import { AdminFeaturedHandler } from '../../src/modules/admin-featured/admin-featured.handler.js';
 import { AdminFeesHandler } from '../../src/modules/admin-fees/admin-fees.handler.js';
 import { AdminHeritageSitesHandler } from '../../src/modules/admin-heritage-sites/admin-heritage-sites.handler.js';
 import { AdminLedgerHandler } from '../../src/modules/admin-ledger/admin-ledger.handler.js';
@@ -34,6 +35,7 @@ export type IdentityHarness = {
   adminFees: AdminFeesHandler;
   adminHeritageSites: AdminHeritageSitesHandler;
   adminTaxonomy: AdminTaxonomyHandler;
+  adminFeatured: AdminFeaturedHandler;
   prisma: PrismaService;
   redis: RedisClient;
   reset: () => Promise<void>;
@@ -68,11 +70,12 @@ export async function createIdentity(): Promise<IdentityHarness> {
     adminFees: app.get(AdminFeesHandler),
     adminHeritageSites: app.get(AdminHeritageSitesHandler),
     adminTaxonomy: app.get(AdminTaxonomyHandler),
+    adminFeatured: app.get(AdminFeaturedHandler),
     prisma,
     redis,
     reset: async () => {
       await prisma.$executeRawUnsafe(
-        'TRUNCATE TABLE users, admins, reviews, bookings, providers, provider_documents, provider_account_events, disputes, ledger_accounts, fee_settings, commission_rates, heritage_sites, taxonomy_terms',
+        'TRUNCATE TABLE users, admins, reviews, bookings, providers, provider_documents, provider_account_events, disputes, ledger_accounts, fee_settings, commission_rates, heritage_sites, taxonomy_terms, promotions, featured_settings, featured_slot_settings',
       );
       await redis.flushDb();
     },

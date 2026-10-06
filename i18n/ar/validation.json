@@ -47,5 +47,10 @@
   "MAX_ITEMS": "أضف {constraints.0} عناصر على الأكثر.",
   "HERITAGE_STATUS": "اختر منشور أو مسودة.",
   "TAXONOMY_KIND": "اختر التصنيفات أو المرافق أو المحافظات.",
-  "DIRECTION": "اختر -1 (للأعلى) أو 1 (للأسفل)."
+  "DIRECTION": "اختر -1 (للأعلى) أو 1 (للأسفل).",
+  "FEATURED_SLOT": "اختر إحدى خانات الصفحة الرئيسية.",
+  "PROMOTION_KIND": "اختر مميّز أو حملة.",
+  "PROMOTION_STATUS": "اختر مجدول أو مباشر أو منتهٍ.",
+  "DATE_RANGE": "لا يمكن أن يسبق تاريخ الانتهاء تاريخ البدء.",
+  "PROMOTION_LINK_TYPE": "اختر category أو heritageSite أو provider."
 }

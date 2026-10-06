@@ -13,6 +13,7 @@ import {
 import { PrismaService } from '../../core/prisma/prisma.service.js';
 import { containsInsensitive } from '../../core/prisma/search.js';
 import { Prisma, type HeritageSite } from '../../generated/prisma/client.js';
+import { AdminFeaturedCache } from '../admin-featured/admin-featured.cache.js';
 import { AdminHeritageSitesCache } from './admin-heritage-sites.cache.js';
 import { slugFromName, toAdminHeritageSite, toDbGovernorate } from './heritage-site.mapper.js';
 
@@ -52,6 +53,7 @@ export class AdminHeritageSitesService {
     private readonly prisma: PrismaService,
     private readonly cache: AdminHeritageSitesCache,
     private readonly storage: SupabaseStorage,
+    private readonly featuredCache: AdminFeaturedCache,
   ) {}
 
   /** One page of sites, newest first. A page past the end is empty, not an error. */
@@ -141,7 +143,8 @@ export class AdminHeritageSitesService {
           published: input.published,
         },
       });
-      await this.cache.invalidate();
+      // Promotions linked to this site show its name and whether it is published.
+      await Promise.all([this.cache.invalidate(), this.featuredCache.invalidate()]);
       await this.removeImages(imagesOf(before).filter((url) => !imagesOf(row).includes(url)));
       return toAdminHeritageSite(row);
     } catch (error) {
@@ -154,7 +157,7 @@ export class AdminHeritageSitesService {
   async delete({ id }: AdminHeritageSiteDeletePayload): Promise<void> {
     try {
       const row = await this.prisma.heritageSite.delete({ where: { id } });
-      await this.cache.invalidate();
+      await Promise.all([this.cache.invalidate(), this.featuredCache.invalidate()]);
       await this.removeImages(imagesOf(row));
     } catch (error) {
       if (isMissingRow(error)) throw rpcError(IdentityError.HERITAGE_SITE_NOT_FOUND);

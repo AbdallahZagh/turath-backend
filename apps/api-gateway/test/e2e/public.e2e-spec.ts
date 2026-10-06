@@ -445,6 +445,10 @@ describe('Swagger', () => {
       '/api/v1/admin/lists',
       '/api/v1/admin/lists/{id}',
       '/api/v1/admin/lists/{id}/move',
+      '/api/v1/admin/featured',
+      '/api/v1/admin/featured/targets',
+      '/api/v1/admin/featured/slots',
+      '/api/v1/admin/featured/{id}',
     ]);
   });
 });
