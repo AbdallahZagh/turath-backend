@@ -181,3 +181,24 @@ export function IsNotBefore(otherField: string, messageKey = 'validation.DATE_RA
       },
     });
 }
+
+/**
+ * The number must be greater than the number in another field of the same object. It says nothing
+ * when either one is not a number: that field's own rules report it.
+ */
+export function IsGreaterThan(otherField: string, messageKey: string) {
+  return (target: object, propertyName: string | symbol) =>
+    registerDecorator({
+      name: 'isGreaterThan',
+      target: target.constructor,
+      propertyName: String(propertyName),
+      constraints: [otherField],
+      options: { message: msg(messageKey) },
+      validator: {
+        validate(value: unknown, args): boolean {
+          const other = (args?.object as Record<string, unknown> | undefined)?.[otherField];
+          return typeof value !== 'number' || typeof other !== 'number' || value > other;
+        },
+      },
+    });
+}

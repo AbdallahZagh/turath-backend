@@ -7,6 +7,6 @@ import { AdminFeaturedService } from './admin-featured.service.js';
 @Module({
   controllers: [AdminFeaturedHandler],
   providers: [AdminFeaturedService, AdminFeaturedCache],
-  exports: [AdminFeaturedCache],
+  exports: [AdminFeaturedCache, AdminFeaturedService],
 })
 export class AdminFeaturedModule {}

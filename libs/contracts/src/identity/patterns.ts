@@ -98,6 +98,12 @@ export const AdminCouponPatterns = {
   TARGETS: 'identity.admin.coupons.targets',
 } as const;
 
+/** Message patterns for the settings page in the admin dashboard. */
+export const AdminSettingsPatterns = {
+  GET: 'identity.admin.settings.get',
+  SAVE: 'identity.admin.settings.save',
+} as const;
+
 /** Message patterns for the businesses table and detail page in the admin dashboard. */
 export const AdminProviderPatterns = {
   LIST: 'identity.admin.providers.list',

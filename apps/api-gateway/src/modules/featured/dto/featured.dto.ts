@@ -1,9 +1,8 @@
-import { applyDecorators } from '@nestjs/common';
 import { ApiHideProperty, ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
-import { IsBoolean, IsObject, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator';
+import { IsObject, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator';
 import { i18nValidationMessage as msg } from 'nestjs-i18n';
-import { IsCalendarDate, IsIntInRange, IsNotBefore, IsOneOf, IsText, Required, trim } from '@turath/common';
+import { IsCalendarDate, IsIntInRange, IsNotBefore, IsOneOf, IsText, trim } from '@turath/common';
 import {
   FEATURED_SLOT_CAPACITY,
   FEATURED_SLOT_IDS,
@@ -28,6 +27,7 @@ import {
   type SavePromotionInput,
 } from '@turath/contracts';
 import { IsNestedObject } from '../../../core/dto/nested-object.js';
+import { IsSwitch } from '../../../core/dto/switch.js';
 import { PageQueryDto } from '../../../core/dto/page-query.dto.js';
 import { LocalizedNameDto } from '../../admin-users/dto/admin-user.dto.js';
 
@@ -272,9 +272,6 @@ export class FeaturedSlotsOverviewDto implements FeaturedSlotsOverview {
   @ApiProperty({ type: [FeaturedSlotOverviewDto], description: 'Every slot, in the order of the slot ids.' })
   slots: FeaturedSlotOverviewDto[];
 }
-
-/** A switch: required, true or false. */
-const IsSwitch = () => applyDecorators(Required(), IsBoolean({ message: msg('validation.BOOLEAN') }));
 
 /** The switch of every slot. All eight are required. */
 export class FeaturedSlotFlagsDto implements Record<FeaturedSlotId, boolean> {

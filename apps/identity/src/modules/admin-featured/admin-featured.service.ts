@@ -212,7 +212,7 @@ export class AdminFeaturedService {
     const day = today();
     return this.cache.remember(`slots:${day}`, async () => {
       const [settings, taken] = await Promise.all([
-        this.settings(this.prisma),
+        this.flags(this.prisma),
         this.prisma.promotion.groupBy({
           by: ['slot'],
           where: { endAt: { gte: asDay(day) } },
@@ -239,32 +239,38 @@ export class AdminFeaturedService {
    * Saves the master switch and every slot's switch at once. Promotions already in a slot that is
    * switched off stay, but stop showing on the home page; nothing new can be added to it.
    */
-  async saveSlots({ featuringEnabled, slots }: FeaturedSlotsSavePayload): Promise<FeaturedSlotsOverview> {
-    await this.write(async (tx) => {
-      // The same fixed order for every writer, so two saves cannot wait on each other forever.
-      for (const slot of FEATURED_SLOT_IDS) await this.lock(tx, slot);
-
-      await tx.featuredSettings.upsert({
-        where: { id: 1 },
-        create: { id: 1, featuringEnabled },
-        update: { featuringEnabled },
-      });
-      for (const slot of FEATURED_SLOT_IDS) {
-        await tx.featuredSlotSetting.upsert({
-          where: { slot: toDbSlot(slot) },
-          create: { slot: toDbSlot(slot), enabled: slots[slot] },
-          update: { enabled: slots[slot] },
-        });
-      }
-    });
+  async saveSlots(payload: FeaturedSlotsSavePayload): Promise<FeaturedSlotsOverview> {
+    await this.write((tx) => this.applySlots(tx, payload));
     return this.slots();
+  }
+
+  /**
+   * Writes the switches inside the caller's transaction (the settings page saves them together with
+   * its own values). The caller must drop the cache afterwards.
+   */
+  async applySlots(tx: Tx, { featuringEnabled, slots }: FeaturedSlotsSavePayload): Promise<void> {
+    // The same fixed order for every writer, so two saves cannot wait on each other forever.
+    for (const slot of FEATURED_SLOT_IDS) await this.lock(tx, slot);
+
+    await tx.featuredSettings.upsert({
+      where: { id: 1 },
+      create: { id: 1, featuringEnabled },
+      update: { featuringEnabled },
+    });
+    for (const slot of FEATURED_SLOT_IDS) {
+      await tx.featuredSlotSetting.upsert({
+        where: { slot: toDbSlot(slot) },
+        create: { slot: toDbSlot(slot), enabled: slots[slot] },
+        update: { enabled: slots[slot] },
+      });
+    }
   }
 
   /** What the home page shows: the promotions running today in each active slot. */
   live(): Promise<LiveFeatured> {
     const day = today();
     return this.cache.remember(`live:${day}`, async () => {
-      const settings = await this.settings(this.prisma);
+      const settings = await this.flags(this.prisma);
       const date = asDay(day);
       const rows = settings.featuringEnabled
         ? await this.prisma.promotion.findMany({
@@ -295,7 +301,7 @@ export class AdminFeaturedService {
     if (kindForSlot(input.slot) !== input.kind) throw rpcError(IdentityError.PROMOTION_KIND_SLOT_MISMATCH);
     if (input.endAt < day) return;
 
-    const settings = await this.settings(tx);
+    const settings = await this.flags(tx);
     if (!settings.featuringEnabled || !settings.slots[input.slot]) throw rpcError(IdentityError.FEATURED_SLOT_DISABLED);
 
     const capacity = FEATURED_SLOT_CAPACITY[input.slot];
@@ -306,7 +312,8 @@ export class AdminFeaturedService {
   }
 
   /** The switches, with everything never saved on. */
-  private async settings(client: Tx | PrismaService): Promise<Settings> {
+  /** The home page featuring switches, with everything never saved on. */
+  async flags(client: Tx | PrismaService): Promise<Settings> {
     const master = await client.featuredSettings.findUnique({ where: { id: 1 } });
     const rows = await client.featuredSlotSetting.findMany();
     const saved = new Map(rows.map((row) => [toApiSlot(row.slot), row.enabled]));

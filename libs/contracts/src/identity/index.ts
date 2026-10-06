@@ -14,5 +14,6 @@ export * from './patterns.js';
 export * from './providers.js';
 export * from './reviews.js';
 export * from './sessions.js';
+export * from './settings.js';
 export * from './taxonomy.js';
 export * from './users.js';

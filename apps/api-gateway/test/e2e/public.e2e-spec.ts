@@ -452,6 +452,7 @@ describe('Swagger', () => {
       '/api/v1/admin/discount-codes',
       '/api/v1/admin/discount-codes/targets',
       '/api/v1/admin/discount-codes/{id}',
+      '/api/v1/admin/settings',
     ]);
   });
 });

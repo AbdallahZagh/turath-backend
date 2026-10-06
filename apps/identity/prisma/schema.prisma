@@ -601,3 +601,31 @@ model Coupon {
   @@index([createdAt])
   @@map("coupons")
 }
+
+enum OtpChannel {
+  SMS
+  WHATSAPP
+}
+
+/// Platform-wide admin settings: always exactly one row (`id = 1`). The home page featuring
+/// switches are part of the same page but live with the Featured module (`featured_settings`
+/// and `featured_slot_settings`), so there is one place for them.
+model PlatformSettings {
+  id                          Int        @id @default(1)
+  /// Most a business on each credit tier can owe the platform, in whole Syrian pounds
+  creditCeilingNewSyp         Int        @map("credit_ceiling_new_syp")
+  creditCeilingEstablishedSyp Int        @map("credit_ceiling_established_syp")
+  creditCeilingEnterpriseSyp  Int        @map("credit_ceiling_enterprise_syp")
+  /// Guest reliability score (0-100) at or above which a guest counts as VIP, standard or restricted
+  vipAtOrAbove                Int        @map("vip_at_or_above")
+  standardAtOrAbove           Int        @map("standard_at_or_above")
+  restrictedAtOrAbove         Int        @map("restricted_at_or_above")
+  /// Whether guests below the restricted cutoff are locked out
+  lockSuspended               Boolean    @map("lock_suspended")
+  /// How one-time codes are delivered to phones
+  otpChannel                  OtpChannel @map("otp_channel")
+  webCheckIn                  Boolean    @map("web_check_in")
+  updatedAt                   DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("platform_settings")
+}
