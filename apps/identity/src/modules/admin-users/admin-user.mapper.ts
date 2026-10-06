@@ -13,14 +13,14 @@ function accountEvents(user: User): AdminUserAccountEvent[] {
 }
 
 /** Database row → one row of the admin guests list. Never includes the password hash. */
-export function toAdminUserView(user: User): AdminUserView {
+export function toAdminUserView(user: User, completedBookings = 0): AdminUserView {
   return {
     id: user.id,
     name: { en: user.fullName, ar: user.fullName },
     phone: formatInternationalPhone(user.phone),
     email: user.email,
     reliability: user.reliabilityScore,
-    completedBookings: 0,
+    completedBookings,
     joinedAt: day(user.createdAt),
     locked: user.lockedAt !== null,
     accountEvents: accountEvents(user),

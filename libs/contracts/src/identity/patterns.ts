@@ -25,6 +25,16 @@ export const AdminUserPatterns = {
   GET: 'identity.admin.users.get',
 } as const;
 
+/** Message pattern for the admin dashboard home page. */
+export const AdminOverviewPatterns = {
+  GET: 'identity.admin.overview.get',
+} as const;
+
+/** Message pattern that counts a visit of a heritage site (public). */
+export const HeritageVisitPatterns = {
+  RECORD: 'identity.heritage.visit',
+} as const;
+
 /** Message patterns for review moderation in the admin dashboard. */
 export const AdminReviewPatterns = {
   LIST: 'identity.admin.reviews.list',

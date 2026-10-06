@@ -15,7 +15,7 @@ import { toDbCategory } from '../admin-bookings/booking.mapper.js';
 import { AdminDisputesCache } from './admin-disputes.cache.js';
 import { toAdminDispute, toAdminDisputeDetail, toApiStatus, toDbStatus } from './dispute.mapper.js';
 
-/** Every filter given must match; `search` matches any of the name and booking code columns. */
+/** Every filter given must match; `search` matches the names, the booking code and the two claims (either language). */
 function where({ category, status, search }: AdminDisputeListPayload): Prisma.DisputeWhereInput {
   return {
     ...(category && { category: toDbCategory(category) }),
@@ -27,6 +27,10 @@ function where({ category, status, search }: AdminDisputeListPayload): Prisma.Di
         { providerNameEn: containsInsensitive(search) },
         { providerNameAr: containsInsensitive(search) },
         { bookingCode: containsInsensitive(search) },
+        { providerClaimEn: containsInsensitive(search) },
+        { providerClaimAr: containsInsensitive(search) },
+        { touristClaimEn: containsInsensitive(search) },
+        { touristClaimAr: containsInsensitive(search) },
       ],
     }),
   };

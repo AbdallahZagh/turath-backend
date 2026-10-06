@@ -83,7 +83,7 @@ export class ListDisputesQueryDto extends PageQueryDto {
     maxLength: 100,
     example: 'palmyra',
     description:
-      'Matches the guest or provider name (English or Arabic) and the booking code, ignoring case. Empty means no search.',
+      'Matches the guest or provider name, the booking code and the text of either claim (English or Arabic), ignoring case. Empty means no search.',
   })
   @Transform(trim)
   @IsOptional()

@@ -14,7 +14,7 @@ Optional filters, matching the filter bar of the page; they combine (all must ma
 
 - \`category\`: \`hotels\`, \`dining\`, \`trips\`, \`events\` or \`guides\`.
 - \`status\`: \`open\`, \`resolvedGuest\` or \`resolvedProvider\`.
-- \`search\`: matches the guest and provider names (English or Arabic) and the booking code, ignoring case.
+- \`search\`: matches the guest and provider names, the booking code and the text of the provider's and the tourist's claims (English or Arabic), ignoring case.
 
 Each item has the same shape as \`AdminDispute\` in the frontend's \`lib/mock/adminDisputes.ts\`: \`guest\`, \`provider\`, \`providerClaim\`, \`touristClaim\` and \`notes\` are \`{ en, ar }\`; \`openedAt\` is \`YYYY-MM-DD\`; \`amountSyp\` is the amount in dispute in whole Syrian pounds; \`notes\` is \`{ "en": "", "ar": "" }\` until the dispute is resolved.
 
@@ -32,7 +32,7 @@ ${rtl(`
 
 - \`category\`: \`hotels\` أو \`dining\` أو \`trips\` أو \`events\` أو \`guides\`.
 - \`status\`: \`open\` أو \`resolvedGuest\` أو \`resolvedProvider\`.
-- \`search\`: يطابق اسمَي الضيف والمزوّد (بالإنجليزية أو العربية) ورمز الحجز، دون تمييز حالة الأحرف.
+- \`search\`: يطابق اسمَي الضيف والمزوّد ورمز الحجز ونص ادعاءَي المزوّد والسائح (بالإنجليزية أو العربية)، دون تمييز حالة الأحرف.
 
 لكل عنصر نفس شكل \`AdminDispute\` في الواجهة الأمامية: \`guest\` و\`provider\` و\`providerClaim\` و\`touristClaim\` و\`notes\` بصيغة \`{ en, ar }\`؛ \`openedAt\` بصيغة \`YYYY-MM-DD\`؛ \`amountSyp\` المبلغ محل النزاع بالليرة السورية كعدد صحيح؛ و\`notes\` تكون \`{ "en": "", "ar": "" }\` إلى أن يُحسم النزاع.
 

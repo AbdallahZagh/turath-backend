@@ -131,6 +131,23 @@ describe('admin dispute list', () => {
       expect(await codes({ search: 'guide1' })).toEqual(['GUIDE1']);
     });
 
+    it('searches the text of both claims, in English and Arabic', async () => {
+      await addDispute({
+        bookingCode: 'CLAIM1',
+        providerClaimEn: 'Rooftop table was left unused',
+        providerClaimAr: 'ترك طاولة السطح فارغة',
+        touristClaimEn: 'The terrace was flooded',
+        touristClaimAr: 'الشرفة كانت غارقة بالمياه',
+      });
+
+      expect(await codes({ search: 'rooftop' })).toEqual(['CLAIM1']);
+      expect(await codes({ search: 'FLOODED' })).toEqual(['CLAIM1']);
+      expect(await codes({ search: 'السطح' })).toEqual(['CLAIM1']);
+      expect(await codes({ search: 'غارقة' })).toEqual(['CLAIM1']);
+      // the claims every other dispute carries match too
+      expect(await codes({ search: 'meeting point' })).toEqual(['DINE01', 'GUIDE1', 'TRIP01']);
+    });
+
     it('takes % and _ literally', async () => {
       expect(await codes({ search: '100%' })).toEqual(['GUIDE1']);
       expect(await codes({ search: 's_' })).toEqual(['GUIDE1']);

@@ -13,6 +13,8 @@ import { AdminHeritageSitesHandler } from '../../src/modules/admin-heritage-site
 import { AdminLedgerHandler } from '../../src/modules/admin-ledger/admin-ledger.handler.js';
 import { AdminProvidersHandler } from '../../src/modules/admin-providers/admin-providers.handler.js';
 import { AdminReviewsHandler } from '../../src/modules/admin-reviews/admin-reviews.handler.js';
+import { AdminOverviewHandler } from '../../src/modules/admin-overview/admin-overview.handler.js';
+import { HeritageVisitsHandler } from '../../src/modules/heritage-visits/heritage-visits.handler.js';
 import { SearchHandler } from '../../src/modules/search/search.handler.js';
 import { AdminSettingsHandler } from '../../src/modules/admin-settings/admin-settings.handler.js';
 import { AdminTaxonomyHandler } from '../../src/modules/admin-taxonomy/admin-taxonomy.handler.js';
@@ -40,6 +42,8 @@ export type IdentityHarness = {
   adminTaxonomy: AdminTaxonomyHandler;
   adminSettings: AdminSettingsHandler;
   search: SearchHandler;
+  adminOverview: AdminOverviewHandler;
+  heritageVisits: HeritageVisitsHandler;
   adminCoupons: AdminCouponsHandler;
   adminFeatured: AdminFeaturedHandler;
   prisma: PrismaService;
@@ -78,13 +82,15 @@ export async function createIdentity(): Promise<IdentityHarness> {
     adminTaxonomy: app.get(AdminTaxonomyHandler),
     adminSettings: app.get(AdminSettingsHandler),
     search: app.get(SearchHandler),
+    adminOverview: app.get(AdminOverviewHandler),
+    heritageVisits: app.get(HeritageVisitsHandler),
     adminCoupons: app.get(AdminCouponsHandler),
     adminFeatured: app.get(AdminFeaturedHandler),
     prisma,
     redis,
     reset: async () => {
       await prisma.$executeRawUnsafe(
-        'TRUNCATE TABLE users, admins, reviews, bookings, providers, provider_documents, provider_account_events, disputes, ledger_accounts, fee_settings, commission_rates, heritage_sites, taxonomy_terms, promotions, featured_settings, featured_slot_settings, coupons, platform_settings, search_documents',
+        'TRUNCATE TABLE users, admins, reviews, bookings, providers, provider_documents, provider_account_events, disputes, ledger_accounts, fee_settings, commission_rates, heritage_sites, taxonomy_terms, promotions, featured_settings, featured_slot_settings, coupons, platform_settings, search_documents, heritage_site_visits',
       );
       await redis.flushDb();
     },

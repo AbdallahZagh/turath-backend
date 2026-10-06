@@ -66,6 +66,7 @@ model User {
   createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt        DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
 
+  @@index([role, createdAt(sort: Desc)])
   @@index([role])
   @@map("users")
 }
@@ -194,6 +195,7 @@ model Booking {
   @@index([guestId])
   @@index([guestPhone])
   @@index([couponCode])
+  @@index([startDate])
   @@map("bookings")
 }
 
@@ -450,6 +452,7 @@ model HeritageSite {
   updatedAt   DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   promotions Promotion[]
+  visits     HeritageSiteVisit[]
 
   @@index([governorate])
   @@index([published])
@@ -666,4 +669,17 @@ model SearchDocument {
   @@index([category])
   @@index([governorate])
   @@map("search_documents")
+}
+
+/// How many times a heritage site was visited on a day (one counter per site and day).
+model HeritageSiteVisit {
+  siteId String   @map("site_id") @db.Uuid
+  day    DateTime @db.Date
+  visits Int      @default(0)
+
+  site HeritageSite @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@id([siteId, day])
+  @@index([day])
+  @@map("heritage_site_visits")
 }

@@ -1,13 +1,18 @@
 import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
-import { AdminUserPatterns, type AdminUserDetailView, type AdminUserPage } from '@turath/contracts';
+import {
+  AdminUserPatterns,
+  type AdminUserDetailView,
+  type AdminUserListPayload,
+  type AdminUserPage,
+} from '@turath/contracts';
 import { Public } from '../../core/auth/auth.decorators.js';
 import { IdentityClient } from '../../core/clients/identity.client.js';
 import { ParseIdPipe } from '../../core/pipes/parse-id.pipe.js';
-import { PageQueryDto } from '../../core/dto/page-query.dto.js';
 import { ApiKeyGuard } from '../admin/api-key.guard.js';
 import { AdminKeyRequired } from '../admin/admin.docs.js';
+import { ListUsersQueryDto } from './dto/admin-user.dto.js';
 import { GetAdminUserDocs, ListAdminUsersDocs } from './admin-users.docs.js';
 
 /**
@@ -26,8 +31,14 @@ export class AdminUsersController {
 
   @Get()
   @ListAdminUsersDocs()
-  list(@Query() { page, limit }: PageQueryDto): Promise<AdminUserPage> {
-    return this.identity.send(AdminUserPatterns.LIST, { page, limit });
+  list(@Query() { page, limit, account, reliability, search }: ListUsersQueryDto): Promise<AdminUserPage> {
+    return this.identity.send<AdminUserPage, AdminUserListPayload>(AdminUserPatterns.LIST, {
+      page,
+      limit,
+      account,
+      reliability,
+      search: search || undefined,
+    });
   }
 
   @Get(':id')

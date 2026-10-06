@@ -8,6 +8,8 @@ import { RedisModule } from '@turath/redis';
 import { CoreModule } from './core/core.module.js';
 import { AdminBookingsModule } from './modules/admin-bookings/admin-bookings.module.js';
 import { AdminCouponsModule } from './modules/admin-coupons/admin-coupons.module.js';
+import { AdminOverviewModule } from './modules/admin-overview/admin-overview.module.js';
+import { HeritageVisitsModule } from './modules/heritage-visits/heritage-visits.module.js';
 import { AdminDisputesModule } from './modules/admin-disputes/admin-disputes.module.js';
 import { AdminFeaturedModule } from './modules/admin-featured/admin-featured.module.js';
 import { AdminFeesModule } from './modules/admin-fees/admin-fees.module.js';
@@ -66,6 +68,8 @@ import { UsersModule } from './modules/users/users.module.js';
     AdminTaxonomyModule,
     AdminCouponsModule,
     AdminSettingsModule,
+    AdminOverviewModule,
+    HeritageVisitsModule,
     SearchModule,
     AdminFeaturedModule,
     HealthModule,

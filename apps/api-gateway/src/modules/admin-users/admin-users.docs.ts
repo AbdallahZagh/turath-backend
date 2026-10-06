@@ -16,10 +16,12 @@ Only guests who finished signup (confirmed their phone or email) are listed. Pro
 - \`phone\` is in international format with spaces (\`+963 933 441 208\`).
 - \`email\` is \`null\` for guests who signed up with a phone number only.
 - \`reliability\` is an integer from 0 to 100.
-- \`completedBookings\` is \`0\` until the booking service exists.
+- \`completedBookings\` is how many of the guest's bookings are completed.
 - \`joinedAt\` and each \`accountEvents[].at\` are days (\`YYYY-MM-DD\`, UTC). A locked account has one \`locked\` event; an unlocked account has none.
 
-A bad \`page\` or \`limit\` (not a whole number, out of range) or an unknown query parameter gives \`400 VALIDATION_FAILED\` with one translated message per field. No guests at all is \`200\` with \`total: 0\`, not an error.
+**Search and filters** (all optional, they combine): \`search\` matches the guest's name, email or phone number (a phone can be typed with spaces or \`+\`), \`account\` is \`active\` or \`locked\`, and \`reliability\` is \`vip\`, \`standard\`, \`restricted\` or \`suspended\` (the score cut-offs between the tiers are the ones on the settings page). \`total\` counts the guests that match.
+
+A bad \`page\` or \`limit\` (not a whole number, out of range), a bad filter or an unknown query parameter gives \`400 VALIDATION_FAILED\` with one translated message per field. No guests at all is \`200\` with \`total: 0\`, not an error.
 
 ${API_KEY_NOTE}
 
@@ -33,10 +35,12 @@ ${rtl(`
 - \`phone\` بالصيغة الدولية مع مسافات.
 - \`email\` يكون \`null\` لمن سجّل برقم الهاتف فقط.
 - \`reliability\` عدد صحيح من 0 إلى 100.
-- \`completedBookings\` يساوي \`0\` إلى أن تتوفر خدمة الحجوزات.
+- \`completedBookings\` عدد حجوزات الضيف المكتملة.
 - \`joinedAt\` و\`accountEvents[].at\` أيام بصيغة \`YYYY-MM-DD\`. الحساب المقفل له حدث \`locked\` واحد، وغير المقفل بلا أحداث.
 
-قيمة \`page\` أو \`limit\` غير صحيحة (ليست عددًا صحيحًا أو خارج النطاق) أو معامل غير معروف تعيد \`400 VALIDATION_FAILED\` مع رسالة مترجمة لكل حقل. عدم وجود ضيوف يعيد \`200\` مع \`total: 0\` وليس خطأ.
+**البحث والفلاتر** (اختيارية وتُطبَّق معًا): \`search\` يطابق اسم الضيف أو بريده أو رقم هاتفه (يمكن كتابة الهاتف بمسافات أو \`+\`)، و\`account\` هو \`active\` أو \`locked\`، و\`reliability\` هو \`vip\` أو \`standard\` أو \`restricted\` أو \`suspended\` (حدود الدرجات بين الفئات هي المضبوطة في صفحة الإعدادات). و\`total\` يعدّ الضيوف المطابقين.
+
+قيمة \`page\` أو \`limit\` غير صحيحة (ليست عددًا صحيحًا أو خارج النطاق) أو فلتر غير صحيح أو معامل غير معروف تعيد \`400 VALIDATION_FAILED\` مع رسالة مترجمة لكل حقل. عدم وجود ضيوف يعيد \`200\` مع \`total: 0\` وليس خطأ.
 
 **يتطلب مفتاح الإدارة:** أرسل \`x-api-key: <key>\`. المفتاح المفقود أو الخاطئ يعيد \`404 NOT_FOUND\` كأي مسار غير موجود.
 
@@ -47,9 +51,9 @@ const GET_DESCRIPTION = `
 **One guest with everything the detail page shows:** \`user\`, \`bookings\`, \`activity\` and \`reviews\` (same shape as \`AdminUserDetailData\` in the frontend).
 
 - \`user\` is the same object as an item of \`GET /admin/users\`.
-- \`bookings\` is \`[]\` until the booking service exists.
+- \`bookings\` are the guest's bookings (same shape as \`GET /admin/bookings\`), latest visit first.
 - \`reviews\` are the reviews about this guest, newest first (same shape as \`GET /admin/reviews\`), whatever their moderation status.
-- \`activity\` is the timeline, newest first. For now it holds the account's lock / unlock events; booking events will be added with the booking service.
+- \`activity\` is the timeline, newest first. The story of each booking plus the account's lock / unlock events.
 
 Errors: a malformed \`id\` gives \`400 VALIDATION_FAILED\` (message on the \`id\` field). An id that doesn't belong to a listed guest (unknown, unverified, provider or staff account) gives \`404 USER_NOT_FOUND\`, which the dashboard shows as "not found".
 
@@ -60,9 +64,9 @@ ${rtl(`
 **ضيف واحد مع كل ما تعرضه صفحة التفاصيل:** \`user\` و\`bookings\` و\`activity\` و\`reviews\` (نفس شكل \`AdminUserDetailData\` في الواجهة الأمامية).
 
 - \`user\` هو نفس عنصر \`GET /admin/users\`.
-- \`bookings\` قائمة فارغة إلى أن تتوفر خدمة الحجوزات.
+- \`bookings\` هي حجوزات الضيف (نفس شكل \`GET /admin/bookings\`)، الأحدث زيارةً أولًا.
 - \`reviews\` هي التقييمات المكتوبة عن هذا الضيف، الأحدث أولًا، مهما كانت حالة الإشراف عليها.
-- \`activity\` هو السجل الزمني، الأحدث أولًا، ويضم حاليًا أحداث قفل الحساب وفتحه.
+- \`activity\` هو السجل الزمني، الأحدث أولًا، ويضم قصة كل حجز وأحداث قفل الحساب وفتحه.
 
 المعرّف \`id\` غير الصالح يعيد \`400 VALIDATION_FAILED\`. المعرّف الذي لا يخص ضيفًا معروضًا في القائمة يعيد \`404 USER_NOT_FOUND\`.
 
@@ -73,7 +77,7 @@ ${rtl(`
 
 export const ListAdminUsersDocs = () =>
   applyDecorators(
-    ApiOperation({ summary: 'List guests (paged)', description: LIST_DESCRIPTION }),
+    ApiOperation({ summary: 'List guests (paged, searchable)', description: LIST_DESCRIPTION }),
     ValidationErrorResponse(),
     ApiOkResponse({ type: AdminUserPageDto, description: 'One page of guests; `items` is `[]` past the last page.' }),
   );

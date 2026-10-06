@@ -1,7 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+import { IsOptional, IsString, MaxLength } from 'class-validator';
+import { i18nValidationMessage as msg } from 'nestjs-i18n';
+import { IsOneOf, trim } from '@turath/common';
 import {
   BOOKING_CATEGORIES,
   BOOKING_STATUSES,
+  RELIABILITY_TIERS,
+  USER_ACCOUNT_FILTERS,
   USER_ACTIVITY_CHANNELS,
   USER_ACTIVITY_KINDS,
   type AdminUserAccountEvent,
@@ -12,9 +18,12 @@ import {
   type AdminUserView,
   type BookingCategory,
   type BookingStatus,
+  type ReliabilityTier,
+  type UserAccountFilter,
   type UserActivityChannel,
   type UserActivityKind,
 } from '@turath/contracts';
+import { PageQueryDto } from '../../../core/dto/page-query.dto.js';
 import { AdminReviewDto } from '../../admin-reviews/dto/admin-review.dto.js';
 
 /** The name in each language. */
@@ -52,7 +61,8 @@ export class AdminUserDto implements AdminUserView {
     description: 'Integer score; starts at 100, −30 per no-show.',
   })
   reliability: number;
-  @ApiProperty({ example: 0, description: 'Always `0` until the booking service exists.' }) completedBookings: number;
+  @ApiProperty({ example: 3, description: "How many of the guest's bookings are completed." })
+  completedBookings: number;
   @ApiProperty({ example: '2025-11-04', description: 'Day the account was created (UTC), `YYYY-MM-DD`.' })
   joinedAt: string;
   @ApiProperty({ description: 'True while the account is locked and cannot sign in.' }) locked: boolean;
@@ -119,4 +129,34 @@ export class AdminUserDetailDto implements AdminUserDetailView {
   activity: AdminUserActivityEventDto[];
   @ApiProperty({ type: [AdminReviewDto], description: 'Reviews about this guest, newest first.' })
   reviews: AdminReviewDto[];
+}
+
+/** `GET /admin/users?page=&limit=&account=&reliability=&search=`. Everything is optional. */
+export class ListUsersQueryDto extends PageQueryDto {
+  @ApiPropertyOptional({
+    enum: USER_ACCOUNT_FILTERS,
+    description: 'Only guests whose account is active, or only locked ones.',
+  })
+  @IsOneOf(USER_ACCOUNT_FILTERS, 'validation.USER_ACCOUNT', { optional: true })
+  account?: UserAccountFilter;
+
+  @ApiPropertyOptional({
+    enum: RELIABILITY_TIERS,
+    description:
+      'Only guests in this reliability tier. The score cut-offs between the tiers are the ones set on the settings page.',
+  })
+  @IsOneOf(RELIABILITY_TIERS, 'validation.RELIABILITY_TIER', { optional: true })
+  reliability?: ReliabilityTier;
+
+  @ApiPropertyOptional({
+    maxLength: 100,
+    example: 'rami',
+    description:
+      "Matches the guest's name, email or phone number, ignoring case. A phone can be typed with spaces or `+`. Empty means no search.",
+  })
+  @Transform(trim)
+  @IsOptional()
+  @IsString({ message: msg('validation.STRING') })
+  @MaxLength(100, { message: msg('validation.MAX_LENGTH') })
+  search?: string;
 }

@@ -1,7 +1,12 @@
 import { Controller, UseFilters } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { type PageQuery, RpcAllExceptionsFilter } from '@turath/common';
-import { AdminUserPatterns, type AdminUserDetailView, type AdminUserPage } from '@turath/contracts';
+import { RpcAllExceptionsFilter } from '@turath/common';
+import {
+  AdminUserPatterns,
+  type AdminUserDetailView,
+  type AdminUserListPayload,
+  type AdminUserPage,
+} from '@turath/contracts';
 import { AdminUsersService } from './admin-users.service.js';
 
 /** RabbitMQ handlers for the admin guests list. The gateway checks the API key and validates input. */
@@ -11,7 +16,7 @@ export class AdminUsersHandler {
   constructor(private readonly users: AdminUsersService) {}
 
   @MessagePattern(AdminUserPatterns.LIST)
-  list(@Payload() query: PageQuery): Promise<AdminUserPage> {
+  list(@Payload() query: AdminUserListPayload): Promise<AdminUserPage> {
     return this.users.list(query);
   }
 

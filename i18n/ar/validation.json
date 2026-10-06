@@ -62,5 +62,7 @@
   "COUPON_SCOPE_ID": "استخدم الأحرف والأرقام و - _ . : فقط (حتى 100 حرف).",
   "OTP_CHANNEL": "اختر sms أو whatsapp.",
   "SCORE_ORDER": "يجب أن تتناقص الدرجات: كبار العملاء فوق العادي فوق المقيَّد.",
-  "SEARCH_TYPE": "اختر heritageSite أو provider أو category أو region."
+  "SEARCH_TYPE": "اختر heritageSite أو provider أو category أو region.",
+  "USER_ACCOUNT": "اختر active أو locked.",
+  "RELIABILITY_TIER": "اختر vip أو standard أو restricted أو suspended."
 }

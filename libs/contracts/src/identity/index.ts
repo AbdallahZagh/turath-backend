@@ -10,6 +10,7 @@ export * from './featured.js';
 export * from './fees.js';
 export * from './heritage-sites.js';
 export * from './ledger.js';
+export * from './overview.js';
 export * from './patterns.js';
 export * from './providers.js';
 export * from './reviews.js';

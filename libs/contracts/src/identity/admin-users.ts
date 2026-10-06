@@ -1,4 +1,4 @@
-import type { Page } from '@turath/common';
+import type { Page, PageQuery } from '@turath/common';
 import type { AdminBooking } from './bookings.js';
 import type { AdminReview } from './reviews.js';
 
@@ -31,7 +31,23 @@ export type AdminUserView = {
   accountEvents: AdminUserAccountEvent[];
 };
 
-/** One page of the guests list (`?page=&limit=`). */
+/** The account filter of the guests page. */
+export const USER_ACCOUNT_FILTERS = ['active', 'locked'] as const;
+export type UserAccountFilter = (typeof USER_ACCOUNT_FILTERS)[number];
+
+/** The reliability tiers of the guests page; the score cut-offs between them are set on the settings page. */
+export const RELIABILITY_TIERS = ['vip', 'standard', 'restricted', 'suspended'] as const;
+export type ReliabilityTier = (typeof RELIABILITY_TIERS)[number];
+
+/** `GET /admin/users` filters, on top of paging. Every filter is optional and they combine. */
+export type AdminUserListPayload = PageQuery & {
+  account?: UserAccountFilter;
+  reliability?: ReliabilityTier;
+  /** Matches the guest's name, email and phone number, ignoring case. */
+  search?: string;
+};
+
+/** One page of the guests list (`?page=&limit=&account=&reliability=&search=`). */
 export type AdminUserPage = Page<AdminUserView>;
 
 type LocalizedText = { en: string; ar: string };
