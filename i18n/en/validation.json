@@ -61,5 +61,6 @@
   "COUNT": "Enter a whole number from 1 up, or leave it empty for no limit.",
   "COUPON_SCOPE_ID": "Use letters, digits and - _ . : only (up to 100 characters).",
   "OTP_CHANNEL": "Choose sms or whatsapp.",
-  "SCORE_ORDER": "The scores must go down: VIP above standard above restricted."
+  "SCORE_ORDER": "The scores must go down: VIP above standard above restricted.",
+  "SEARCH_TYPE": "Choose heritageSite, provider, category or region."
 }

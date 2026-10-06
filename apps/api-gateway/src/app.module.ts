@@ -29,6 +29,7 @@ import { HealthModule } from './modules/health/health.module.js';
 import { MetaModule } from './modules/meta/meta.module.js';
 import { PreferencesModule } from './modules/preferences/preferences.module.js';
 import { ProfileModule } from './modules/profile/profile.module.js';
+import { SearchModule } from './modules/search/search.module.js';
 import { SessionsModule } from './modules/sessions/sessions.module.js';
 
 @Module({
@@ -97,6 +98,7 @@ import { SessionsModule } from './modules/sessions/sessions.module.js';
     FeaturedModule,
     AdminCouponsModule,
     AdminSettingsModule,
+    SearchModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },

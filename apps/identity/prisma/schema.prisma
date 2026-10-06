@@ -629,3 +629,41 @@ model PlatformSettings {
 
   @@map("platform_settings")
 }
+
+enum SearchDocType {
+  CATEGORY
+  REGION
+  HERITAGE_SITE
+  PROVIDER
+}
+
+/// The global search index: one row per thing a visitor can find (published heritage sites, approved
+/// businesses, the booking categories and the regions). It is derived data, kept in step with its
+/// sources by database triggers (see the migration), so nothing in the app writes to it and any
+/// writer of the source tables is covered. Searches run on `text_norm` and `title_norm`, which hold
+/// the text in the normal form made by the SQL function `search_normalize`.
+model SearchDocument {
+  id          String           @id @default(uuid()) @db.Uuid
+  type        SearchDocType
+  /// The id of the site or business, or the slug of the category or region
+  ref         String           @db.VarChar(160)
+  titleEn     String           @map("title_en") @db.VarChar(150)
+  titleAr     String           @map("title_ar") @db.VarChar(150)
+  summaryEn   String?          @map("summary_en") @db.VarChar(220)
+  summaryAr   String?          @map("summary_ar") @db.VarChar(220)
+  slug        String?          @db.VarChar(160)
+  imageSrc    String?          @map("image_src") @db.VarChar(500)
+  category    BookingCategory?
+  governorate Governorate?
+  /// Both titles and the slug, normalised: for exact and prefix matches and for ranking
+  titleNorm   String           @map("title_norm")
+  /// Everything searchable, normalised: trigram-indexed
+  textNorm    String           @map("text_norm")
+  updatedAt   DateTime         @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([type, ref])
+  @@index([type])
+  @@index([category])
+  @@index([governorate])
+  @@map("search_documents")
+}

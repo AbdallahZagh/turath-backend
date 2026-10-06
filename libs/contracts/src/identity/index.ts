@@ -13,6 +13,7 @@ export * from './ledger.js';
 export * from './patterns.js';
 export * from './providers.js';
 export * from './reviews.js';
+export * from './search.js';
 export * from './sessions.js';
 export * from './settings.js';
 export * from './taxonomy.js';

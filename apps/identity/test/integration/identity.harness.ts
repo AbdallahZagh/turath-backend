@@ -13,6 +13,7 @@ import { AdminHeritageSitesHandler } from '../../src/modules/admin-heritage-site
 import { AdminLedgerHandler } from '../../src/modules/admin-ledger/admin-ledger.handler.js';
 import { AdminProvidersHandler } from '../../src/modules/admin-providers/admin-providers.handler.js';
 import { AdminReviewsHandler } from '../../src/modules/admin-reviews/admin-reviews.handler.js';
+import { SearchHandler } from '../../src/modules/search/search.handler.js';
 import { AdminSettingsHandler } from '../../src/modules/admin-settings/admin-settings.handler.js';
 import { AdminTaxonomyHandler } from '../../src/modules/admin-taxonomy/admin-taxonomy.handler.js';
 import { AdminUsersHandler } from '../../src/modules/admin-users/admin-users.handler.js';
@@ -38,6 +39,7 @@ export type IdentityHarness = {
   adminHeritageSites: AdminHeritageSitesHandler;
   adminTaxonomy: AdminTaxonomyHandler;
   adminSettings: AdminSettingsHandler;
+  search: SearchHandler;
   adminCoupons: AdminCouponsHandler;
   adminFeatured: AdminFeaturedHandler;
   prisma: PrismaService;
@@ -75,13 +77,14 @@ export async function createIdentity(): Promise<IdentityHarness> {
     adminHeritageSites: app.get(AdminHeritageSitesHandler),
     adminTaxonomy: app.get(AdminTaxonomyHandler),
     adminSettings: app.get(AdminSettingsHandler),
+    search: app.get(SearchHandler),
     adminCoupons: app.get(AdminCouponsHandler),
     adminFeatured: app.get(AdminFeaturedHandler),
     prisma,
     redis,
     reset: async () => {
       await prisma.$executeRawUnsafe(
-        'TRUNCATE TABLE users, admins, reviews, bookings, providers, provider_documents, provider_account_events, disputes, ledger_accounts, fee_settings, commission_rates, heritage_sites, taxonomy_terms, promotions, featured_settings, featured_slot_settings, coupons, platform_settings',
+        'TRUNCATE TABLE users, admins, reviews, bookings, providers, provider_documents, provider_account_events, disputes, ledger_accounts, fee_settings, commission_rates, heritage_sites, taxonomy_terms, promotions, featured_settings, featured_slot_settings, coupons, platform_settings, search_documents',
       );
       await redis.flushDb();
     },

@@ -104,6 +104,11 @@ export const AdminSettingsPatterns = {
   SAVE: 'identity.admin.settings.save',
 } as const;
 
+/** Message patterns for the public global search. */
+export const SearchPatterns = {
+  QUERY: 'identity.search.query',
+} as const;
+
 /** Message patterns for the businesses table and detail page in the admin dashboard. */
 export const AdminProviderPatterns = {
   LIST: 'identity.admin.providers.list',

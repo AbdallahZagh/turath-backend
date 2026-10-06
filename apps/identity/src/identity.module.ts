@@ -21,6 +21,7 @@ import { AdminUsersModule } from './modules/admin-users/admin-users.module.js';
 import { AdminsModule } from './modules/admins/admins.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { HealthModule } from './modules/health/health.module.js';
+import { SearchModule } from './modules/search/search.module.js';
 import { SessionsModule } from './modules/sessions/sessions.module.js';
 import { UsersModule } from './modules/users/users.module.js';
 
@@ -65,6 +66,7 @@ import { UsersModule } from './modules/users/users.module.js';
     AdminTaxonomyModule,
     AdminCouponsModule,
     AdminSettingsModule,
+    SearchModule,
     AdminFeaturedModule,
     HealthModule,
   ],
