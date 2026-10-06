@@ -18,5 +18,7 @@
   "BOOKING_NOT_FOUND": "Booking not found.",
   "BOOKING_STATUS_INVALID": "This booking can't be moved to that status from its current one.",
   "BOOKING_STATUS_CHANGED": "Someone else just changed this booking. Reload it and try again.",
+  "DISPUTE_NOT_FOUND": "Dispute not found.",
+  "DISPUTE_ALREADY_RESOLVED": "This dispute was already resolved the other way. Reload it to see the decision.",
   "PROVIDER_NOT_FOUND": "Business not found."
 }

@@ -3,6 +3,7 @@ export * from './admin-users.js';
 export * from './admins.js';
 export * from './auth.js';
 export * from './bookings.js';
+export * from './disputes.js';
 export * from './errors.js';
 export * from './patterns.js';
 export * from './providers.js';

@@ -315,3 +315,44 @@ model ProviderAccountEvent {
   @@index([providerId])
   @@map("provider_account_events")
 }
+
+enum DisputeStatus {
+  OPEN
+  RESOLVED_GUEST
+  RESOLVED_PROVIDER
+}
+
+/// A disagreement over a booking, settled from the admin dashboard. Names are
+/// copied onto the row (like reviews and bookings) and `bookingCode` points at
+/// the booking by code. Amounts are whole Syrian pounds.
+model Dispute {
+  id              String          @id @default(uuid()) @db.Uuid
+  bookingCode     String          @map("booking_code") @db.VarChar(12)
+  guestNameEn     String          @map("guest_name_en") @db.VarChar(100)
+  guestNameAr     String          @map("guest_name_ar") @db.VarChar(100)
+  providerNameEn  String          @map("provider_name_en") @db.VarChar(150)
+  providerNameAr  String          @map("provider_name_ar") @db.VarChar(150)
+  category        BookingCategory
+  /// Day the dispute was opened
+  openedAt        DateTime        @map("opened_at") @db.Date
+  /// The amount in dispute
+  amountSyp       Int             @map("amount_syp")
+  providerClaimEn String          @map("provider_claim_en") @db.VarChar(1000)
+  providerClaimAr String          @map("provider_claim_ar") @db.VarChar(1000)
+  touristClaimEn  String          @map("tourist_claim_en") @db.VarChar(1000)
+  touristClaimAr  String          @map("tourist_claim_ar") @db.VarChar(1000)
+  /// The admin's resolution notes; empty until resolved
+  notesEn         String          @default("") @map("notes_en") @db.VarChar(1000)
+  notesAr         String          @default("") @map("notes_ar") @db.VarChar(1000)
+  status          DisputeStatus   @default(OPEN)
+  /// Set when the dispute leaves `OPEN`
+  resolvedAt      DateTime?       @map("resolved_at") @db.Timestamptz(6)
+  createdAt       DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([openedAt])
+  @@index([status])
+  @@index([category])
+  @@index([bookingCode])
+  @@map("disputes")
+}

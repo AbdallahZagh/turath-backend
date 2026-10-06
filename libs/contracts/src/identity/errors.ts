@@ -37,6 +37,10 @@ export const IdentityError = defineErrors('identity', {
   BOOKING_STATUS_INVALID: HttpStatus.CONFLICT,
   BOOKING_STATUS_CHANGED: HttpStatus.CONFLICT,
 
+  // dispute resolution
+  DISPUTE_NOT_FOUND: HttpStatus.NOT_FOUND,
+  DISPUTE_ALREADY_RESOLVED: HttpStatus.CONFLICT,
+
   // provider management
   PROVIDER_NOT_FOUND: HttpStatus.NOT_FOUND,
 });

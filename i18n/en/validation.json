@@ -35,5 +35,8 @@
   "BOOKING_STATUS": "Choose pending, confirmed, checkedIn, completed, cancelled, noShow or disputed.",
   "PROVIDER_STATUS": "Choose pending, approved, rejected or suspended.",
   "PROVIDER_CATEGORY": "Choose hotels, dining, trips, events or guides.",
-  "GOVERNORATE": "Choose damascus, aleppo, latakia, tartus, homs, hama, palmyra or bosra."
+  "GOVERNORATE": "Choose damascus, aleppo, latakia, tartus, homs, hama, palmyra or bosra.",
+  "DISPUTE_STATUS": "Choose open, resolvedGuest or resolvedProvider.",
+  "DISPUTE_RESOLUTION": "Choose resolvedGuest (the guest is right) or resolvedProvider (the provider is right).",
+  "OBJECT": "Must be an object with en and ar."
 }

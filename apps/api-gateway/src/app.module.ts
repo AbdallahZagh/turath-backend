@@ -13,6 +13,7 @@ import { CoreModule } from './core/core.module.js';
 import { AppThrottlerGuard } from './core/guards/app-throttler.guard.js';
 import { AdminModule } from './modules/admin/admin.module.js';
 import { AdminBookingsModule } from './modules/admin-bookings/admin-bookings.module.js';
+import { AdminDisputesModule } from './modules/admin-disputes/admin-disputes.module.js';
 import { AdminProvidersModule } from './modules/admin-providers/admin-providers.module.js';
 import { AdminReviewsModule } from './modules/admin-reviews/admin-reviews.module.js';
 import { AdminUsersModule } from './modules/admin-users/admin-users.module.js';
@@ -81,6 +82,7 @@ import { SessionsModule } from './modules/sessions/sessions.module.js';
     AdminReviewsModule,
     AdminBookingsModule,
     AdminProvidersModule,
+    AdminDisputesModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
