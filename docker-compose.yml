@@ -14,7 +14,7 @@ x-app-env: &app-env
   SUPABASE_BUCKET: ${SUPABASE_BUCKET:-heritage-sites}
 
 x-identity-db: &identity-db
-  IDENTITY_DATABASE_URL: postgresql://${POSTGRES_USER:-turath}:${POSTGRES_PASSWORD:-turath}@postgres:5432/turath_identity
+  IDENTITY_DATABASE_URL: ${DOCKER_IDENTITY_DATABASE_URL:-postgresql://${POSTGRES_USER:-turath}:${POSTGRES_PASSWORD:-turath}@postgres:5432/turath_identity}
 
 services:
   postgres:
