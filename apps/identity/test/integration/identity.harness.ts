@@ -5,6 +5,7 @@ import { REDIS_CLIENT, type RedisClient } from '@turath/redis';
 import { PrismaService } from '../../src/core/prisma/prisma.service.js';
 import { IdentityModule } from '../../src/identity.module.js';
 import { AdminBookingsHandler } from '../../src/modules/admin-bookings/admin-bookings.handler.js';
+import { AdminCouponsHandler } from '../../src/modules/admin-coupons/admin-coupons.handler.js';
 import { AdminDisputesHandler } from '../../src/modules/admin-disputes/admin-disputes.handler.js';
 import { AdminFeaturedHandler } from '../../src/modules/admin-featured/admin-featured.handler.js';
 import { AdminFeesHandler } from '../../src/modules/admin-fees/admin-fees.handler.js';
@@ -35,6 +36,7 @@ export type IdentityHarness = {
   adminFees: AdminFeesHandler;
   adminHeritageSites: AdminHeritageSitesHandler;
   adminTaxonomy: AdminTaxonomyHandler;
+  adminCoupons: AdminCouponsHandler;
   adminFeatured: AdminFeaturedHandler;
   prisma: PrismaService;
   redis: RedisClient;
@@ -70,12 +72,13 @@ export async function createIdentity(): Promise<IdentityHarness> {
     adminFees: app.get(AdminFeesHandler),
     adminHeritageSites: app.get(AdminHeritageSitesHandler),
     adminTaxonomy: app.get(AdminTaxonomyHandler),
+    adminCoupons: app.get(AdminCouponsHandler),
     adminFeatured: app.get(AdminFeaturedHandler),
     prisma,
     redis,
     reset: async () => {
       await prisma.$executeRawUnsafe(
-        'TRUNCATE TABLE users, admins, reviews, bookings, providers, provider_documents, provider_account_events, disputes, ledger_accounts, fee_settings, commission_rates, heritage_sites, taxonomy_terms, promotions, featured_settings, featured_slot_settings',
+        'TRUNCATE TABLE users, admins, reviews, bookings, providers, provider_documents, provider_account_events, disputes, ledger_accounts, fee_settings, commission_rates, heritage_sites, taxonomy_terms, promotions, featured_settings, featured_slot_settings, coupons',
       );
       await redis.flushDb();
     },

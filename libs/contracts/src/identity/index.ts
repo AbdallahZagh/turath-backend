@@ -4,6 +4,7 @@ export * from './admins.js';
 export * from './auth.js';
 export * from './bookings.js';
 export * from './disputes.js';
+export * from './coupons.js';
 export * from './errors.js';
 export * from './featured.js';
 export * from './fees.js';

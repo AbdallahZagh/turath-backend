@@ -88,6 +88,16 @@ export const AdminFeaturedPatterns = {
   LIVE: 'identity.featured.live',
 } as const;
 
+/** Message patterns for the discount codes page in the admin dashboard. */
+export const AdminCouponPatterns = {
+  LIST: 'identity.admin.coupons.list',
+  GET: 'identity.admin.coupons.get',
+  CREATE: 'identity.admin.coupons.create',
+  UPDATE: 'identity.admin.coupons.update',
+  DELETE: 'identity.admin.coupons.delete',
+  TARGETS: 'identity.admin.coupons.targets',
+} as const;
+
 /** Message patterns for the businesses table and detail page in the admin dashboard. */
 export const AdminProviderPatterns = {
   LIST: 'identity.admin.providers.list',

@@ -13,6 +13,7 @@ import { CoreModule } from './core/core.module.js';
 import { AppThrottlerGuard } from './core/guards/app-throttler.guard.js';
 import { AdminModule } from './modules/admin/admin.module.js';
 import { AdminBookingsModule } from './modules/admin-bookings/admin-bookings.module.js';
+import { AdminCouponsModule } from './modules/admin-coupons/admin-coupons.module.js';
 import { AdminDisputesModule } from './modules/admin-disputes/admin-disputes.module.js';
 import { AdminFeesModule } from './modules/admin-fees/admin-fees.module.js';
 import { AdminHeritageSitesModule } from './modules/admin-heritage-sites/admin-heritage-sites.module.js';
@@ -93,6 +94,7 @@ import { SessionsModule } from './modules/sessions/sessions.module.js';
     AdminHeritageSitesModule,
     AdminTaxonomyModule,
     FeaturedModule,
+    AdminCouponsModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },

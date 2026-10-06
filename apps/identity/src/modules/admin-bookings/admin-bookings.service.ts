@@ -11,6 +11,7 @@ import {
 import { PrismaService } from '../../core/prisma/prisma.service.js';
 import { containsInsensitive } from '../../core/prisma/search.js';
 import type { Prisma } from '../../generated/prisma/client.js';
+import { AdminCouponsCache } from '../admin-coupons/admin-coupons.cache.js';
 import { AdminProvidersCache } from '../admin-providers/admin-providers.cache.js';
 import { AdminBookingsCache } from './admin-bookings.cache.js';
 import { toAdminBooking, toAdminBookingDetail, toApiStatus, toDbCategory, toDbStatus } from './booking.mapper.js';
@@ -47,6 +48,7 @@ export class AdminBookingsService {
     private readonly prisma: PrismaService,
     private readonly cache: AdminBookingsCache,
     private readonly providersCache: AdminProvidersCache,
+    private readonly couponsCache: AdminCouponsCache,
   ) {}
 
   /** One page of bookings, newest first. A page past the end is empty, not an error. */
@@ -92,7 +94,12 @@ export class AdminBookingsService {
       where: { id, status: current.status },
       data: { status: toDbStatus(status) },
     });
-    if (count > 0) await Promise.all([this.cache.invalidate(), this.providersCache.invalidate()]);
+    if (count > 0)
+      await Promise.all([
+        this.cache.invalidate(),
+        this.providersCache.invalidate(),
+        this.couponsCache.invalidate(), // the discount codes page counts non-cancelled bookings
+      ]);
 
     const latest = await this.prisma.booking.findUnique({ where: { id } });
     if (!latest) throw rpcError(IdentityError.BOOKING_NOT_FOUND);

@@ -52,5 +52,12 @@
   "PROMOTION_KIND": "اختر مميّز أو حملة.",
   "PROMOTION_STATUS": "اختر مجدول أو مباشر أو منتهٍ.",
   "DATE_RANGE": "لا يمكن أن يسبق تاريخ الانتهاء تاريخ البدء.",
-  "PROMOTION_LINK_TYPE": "اختر category أو heritageSite أو provider."
+  "PROMOTION_LINK_TYPE": "اختر category أو heritageSite أو provider.",
+  "COUPON_SCOPE": "اختر provider أو listing أو pillar أو platform.",
+  "COUPON_STATUS": "اختر مجدول أو مباشر أو منتهٍ أو متوقف.",
+  "COUPON_KIND": "اختر نسبة مئوية أو مبلغًا ثابتًا.",
+  "COUPON_CODE": "استخدم من 3 إلى 16 حرفًا أو رقمًا دون أي رموز أخرى.",
+  "DISCOUNT_VALUE": "أدخل عددًا صحيحًا: من 1 إلى 100 لخصم بالنسبة المئوية، أو مبلغًا بالليرة لخصم ثابت.",
+  "COUNT": "أدخل عددًا صحيحًا من 1 فأكثر، أو اتركه فارغًا لعدم وجود حد.",
+  "COUPON_SCOPE_ID": "استخدم الأحرف والأرقام و - _ . : فقط (حتى 100 حرف)."
 }

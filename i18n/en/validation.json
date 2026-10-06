@@ -52,5 +52,12 @@
   "PROMOTION_KIND": "Choose featured or campaign.",
   "PROMOTION_STATUS": "Choose scheduled, live or ended.",
   "DATE_RANGE": "The end date can't be before the start date.",
-  "PROMOTION_LINK_TYPE": "Choose category, heritageSite or provider."
+  "PROMOTION_LINK_TYPE": "Choose category, heritageSite or provider.",
+  "COUPON_SCOPE": "Choose provider, listing, pillar or platform.",
+  "COUPON_STATUS": "Choose scheduled, live, ended or disabled.",
+  "COUPON_KIND": "Choose percent or fixed.",
+  "COUPON_CODE": "Use 3 to 16 letters or digits, with no other characters.",
+  "DISCOUNT_VALUE": "Enter a whole number: 1 to 100 for a percent discount, or an amount in pounds for a fixed one.",
+  "COUNT": "Enter a whole number from 1 up, or leave it empty for no limit.",
+  "COUPON_SCOPE_ID": "Use letters, digits and - _ . : only (up to 100 characters)."
 }

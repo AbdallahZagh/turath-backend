@@ -193,6 +193,7 @@ model Booking {
   @@index([category])
   @@index([guestId])
   @@index([guestPhone])
+  @@index([couponCode])
   @@map("bookings")
 }
 
@@ -280,6 +281,7 @@ model Provider {
   documents     ProviderDocument[]
   accountEvents ProviderAccountEvent[]
   promotions    Promotion[]
+  coupons       Coupon[]
 
   @@index([status, submittedAt])
   @@index([category])
@@ -545,4 +547,57 @@ model FeaturedSlotSetting {
   updatedAt DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@map("featured_slot_settings")
+}
+
+enum CouponScope {
+  PLATFORM
+  PILLAR
+  PROVIDER
+  LISTING
+}
+
+enum DiscountKind {
+  PERCENT
+  FIXED
+}
+
+/// A discount code guests enter when booking, managed from the admin dashboard. What it applies to
+/// (`scope`) is one of: everything, one booking category, one business, or one listing. Whether it is
+/// scheduled, live or ended follows from today's date (disabled when `enabled` is false). How many
+/// times it was used is counted from bookings that carry its `code`.
+model Coupon {
+  id             String           @id @default(uuid()) @db.Uuid
+  titleEn        String           @map("title_en") @db.VarChar(150)
+  titleAr        String           @map("title_ar") @db.VarChar(150)
+  /// Upper-case letters and digits, 3-16 characters, unique
+  code           String           @unique @db.VarChar(16)
+  discountKind   DiscountKind     @map("discount_kind")
+  /// A whole percent (1-100) for `PERCENT`, whole Syrian pounds for `FIXED`
+  discountValue  Int              @map("discount_value")
+  scope          CouponScope
+  /// Set for `PILLAR`; every other scope leaves it empty
+  category       BookingCategory?
+  /// Set for `PROVIDER`
+  providerId     String?          @map("provider_id") @db.Uuid
+  /// Set for `LISTING`: the id of the listing, as the booking side knows it
+  listingId      String?          @map("listing_id") @db.VarChar(100)
+  /// First and last day it can be used, both included
+  startAt        DateTime         @map("start_at") @db.Date
+  endAt          DateTime         @map("end_at") @db.Date
+  /// Most times it can be used in total; empty means unlimited
+  maxRedemptions Int?             @map("max_redemptions")
+  /// Most times one guest can use it; empty means unlimited
+  perGuestCap    Int?             @map("per_guest_cap")
+  enabled        Boolean          @default(true)
+  createdAt      DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  provider Provider? @relation(fields: [providerId], references: [id], onDelete: Restrict)
+
+  @@index([scope])
+  @@index([category])
+  @@index([providerId])
+  @@index([enabled, startAt, endAt])
+  @@index([createdAt])
+  @@map("coupons")
 }

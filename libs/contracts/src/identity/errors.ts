@@ -61,6 +61,13 @@ export const IdentityError = defineErrors('identity', {
   FEATURED_SLOT_DISABLED: HttpStatus.CONFLICT,
   FEATURED_SLOT_AT_CAPACITY: HttpStatus.CONFLICT,
 
+  // discount codes
+  COUPON_NOT_FOUND: HttpStatus.NOT_FOUND,
+  COUPON_CODE_TAKEN: HttpStatus.CONFLICT,
+  COUPON_CODE_LOCKED: HttpStatus.CONFLICT,
+  COUPON_SCOPE_INVALID: HttpStatus.BAD_REQUEST,
+  COUPON_PROVIDER_NOT_FOUND: HttpStatus.BAD_REQUEST,
+
   // provider management
   PROVIDER_NOT_FOUND: HttpStatus.NOT_FOUND,
 });

@@ -32,5 +32,10 @@
   "PROMOTION_LINK_UNAVAILABLE": "A promotion can only link to an approved business or a published heritage site.",
   "FEATURED_SLOT_DISABLED": "This slot is switched off. Turn on featuring and this slot in Settings first.",
   "FEATURED_SLOT_AT_CAPACITY": "This slot is full ({capacity} at a time). End or delete a promotion in it first.",
+  "COUPON_NOT_FOUND": "Discount code not found.",
+  "COUPON_CODE_TAKEN": "Another discount code already uses that code.",
+  "COUPON_CODE_LOCKED": "This code has already been used in bookings, so its code can no longer change. Switch it off and add a new one instead.",
+  "COUPON_SCOPE_INVALID": "The scope does not fit what it points at: a platform code points at nothing, a category code needs one of the five categories, and the other scopes need an id.",
+  "COUPON_PROVIDER_NOT_FOUND": "The business this code is for does not exist.",
   "PROVIDER_NOT_FOUND": "Business not found."
 }
